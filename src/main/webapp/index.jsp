@@ -5,91 +5,364 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ocean View Beach Resort - Kalpitiya, Sri Lanka</title>
-    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- CSS Files in Order -->
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/index/navbar.css">
+    <link rel="stylesheet" href="css/index/footer.css">
+    <link rel="stylesheet" href="css/index/pages.css">
+    
+    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Navbar Spacing Fix -->
+    <style>
+        /* ============================================
+           NAVBAR SPACING FIX - Prevent content overlap
+           ============================================ */
+        
+        /* Reset body padding */
+        body {
+            padding-top: 0;
+            margin: 0;
+        }
+        
+        /* Main content spacing to account for fixed navbar */
+        .main-content {
+            padding-top: 85px; /* Space for navbar */
+            min-height: calc(100vh - 85px);
+            position: relative;
+        }
+        
+        /* Loading spinner positioning */
+        .common-loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .common-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #003366;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Hero sections - if you have any */
+        .hero-section {
+            margin-top: -85px;
+            padding-top: 125px;
+            min-height: 100vh;
+        }
+        
+        /* Page headers */
+        .page-header {
+            padding-top: 110px;
+            margin-bottom: 30px;
+        }
+        
+        /* Content sections */
+        .content-section {
+            padding-top: 20px;
+        }
+        
+        /* Ensure dropdown menus appear above content */
+        .navbar-dropdown-menu {
+            z-index: 1001;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Fix for any modals or overlays */
+        .modal, .overlay, .lightbox {
+            z-index: 1050;
+        }
+        
+        /* ============================================
+           RESPONSIVE NAVBAR SPACING
+           ============================================ */
+        
+        /* Tablet screens */
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 75px;
+                min-height: calc(100vh - 75px);
+            }
+            
+            .hero-section {
+                margin-top: -75px;
+                padding-top: 115px;
+            }
+            
+            .page-header {
+                padding-top: 95px;
+            }
+        }
+        
+        /* Mobile screens */
+        @media (max-width: 480px) {
+            .main-content {
+                padding-top: 70px;
+                min-height: calc(100vh - 70px);
+            }
+            
+            .hero-section {
+                margin-top: -70px;
+                padding-top: 105px;
+            }
+            
+            .page-header {
+                padding-top: 90px;
+            }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 320px) {
+            .main-content {
+                padding-top: 65px;
+                min-height: calc(100vh - 65px);
+            }
+            
+            .hero-section {
+                margin-top: -65px;
+                padding-top: 100px;
+            }
+            
+            .page-header {
+                padding-top: 85px;
+            }
+        }
+        
+        /* ============================================
+           ADDITIONAL IMPROVEMENTS
+           ============================================ */
+        
+        /* Error message styling */
+        .error-message {
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Page transition effects */
+        .main-content {
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        /* Ensure footer doesn't overlap */
+        .footer-main {
+            margin-top: 50px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Mobile menu adjustments */
+        @media (max-width: 768px) {
+            .navbar-menu.active {
+                top: 75px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar-menu.active {
+                top: 70px;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            .navbar-menu.active {
+                top: 65px;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <img src="images/logo.png" alt="Ocean View Resort" class="logo">
-                <span class="logo-text">Ocean View</span>
+    <nav class="navbar navbar-main">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="images/logo.png" alt="Ocean View Resort" class="navbar-logo-img" onerror="this.style.display='none'">
+                <span class="navbar-logo-text">Ocean View</span>
             </div>
-            <ul class="nav-menu" id="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active" data-page="pages/home">HOME</a>
+            
+            <ul class="navbar-menu" id="nav-menu">
+                <li class="navbar-item">
+                    <a href="#" class="navbar-link navbar-link-active" data-page="home">HOME</a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" data-page="accommodation">ACCOMMODATION</a>
+                <li class="navbar-item">
+                    <a href="#" class="navbar-link" data-page="accommodation">ACCOMMODATION</a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" data-page="activities">THINGS TO DO</a>
+                <li class="navbar-item navbar-dropdown">
+                    <a href="#" class="navbar-link navbar-dropdown-toggle" data-page="events">
+                        EVENTS <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <ul class="navbar-dropdown-menu">
+                        <li><a href="#" class="navbar-dropdown-link" data-page="events">All Events</a></li>
+                        <li><hr class="navbar-dropdown-divider"></li>
+                        <li><a href="#" class="navbar-dropdown-link" data-page="events/wilpattu-safari">🦁 Wilpattu Safari</a></li>
+                        <li><a href="#" class="navbar-dropdown-link" data-page="events/kitesurfing">🏄 Kitesurfing</a></li>
+                        <li><a href="#" class="navbar-dropdown-link" data-page="events/whale-watching">🐋 Whale Watching</a></li>
+                        <li><a href="#" class="navbar-dropdown-link" data-page="events/dolphin-watching">🐬 Dolphin Watching</a></li>
+                        <li><a href="#" class="navbar-dropdown-link" data-page="events/island-boat-tour">⛵ Island Boat Tour</a></li>
+                        <li><a href="#" class="navbar-dropdown-link" data-page="events/snorkeling">🤿 Snorkeling</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" data-page="cuisine">CUISINE</a>
+                <li class="navbar-item">
+                    <a href="#" class="navbar-link" data-page="gallery">GALLERY</a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" data-page="gallery">GALLERY</a>
+                <li class="navbar-item">
+                    <a href="#" class="navbar-link" data-page="contact">CONTACT US</a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" data-page="contact">CONTACT US</a>
+                <li class="navbar-item">
+                    <a href="login.jsp" class="navbar-link navbar-btn-login">
+                        <i class="fas fa-sign-in-alt"></i> LOGIN
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link reservation-btn" data-page="reservation">BOOK NOW</a>
+                <li class="navbar-item">
+                    <a href="#" class="navbar-link navbar-btn-book" data-page="reservation">BOOK NOW</a>
                 </li>
             </ul>
-            <div class="hamburger" id="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
+            
+            <div class="navbar-hamburger" id="hamburger">
+                <span class="navbar-hamburger-bar"></span>
+                <span class="navbar-hamburger-bar"></span>
+                <span class="navbar-hamburger-bar"></span>
             </div>
         </div>
     </nav>
 
     <!-- Loading Spinner -->
-    <div id="loading" class="loading-spinner" style="display: none;">
-        <div class="spinner"></div>
+    <div id="loading" class="common-loading-spinner" style="display: none;">
+        <div class="common-spinner"></div>
+        <p>Loading...</p>
     </div>
 
-    <!-- Main Content Container -->
+    <!-- Main Content -->
     <main id="main-content" class="main-content">
-        <!-- Content will be loaded here dynamically -->
+        <!-- Content loaded dynamically -->
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Ocean View Beach Resort</h3>
-                    <p>Experience luxury and adventure in beautiful Kalpitiya, Sri Lanka</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="#" data-page="home">Home</a></li>
-                        <li><a href="#" data-page="accommodation">Rooms</a></li>
-                        <li><a href="#" data-page="activities">Activities</a></li>
-                        <li><a href="#" data-page="contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Follow Us</h4>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
+    <footer class="footer footer-main">
+        <div class="footer-wrapper">
+            <div class="container">
+                <div class="footer-content">
+                    <!-- Section 1: About -->
+                    <div class="footer-section footer-section-about">
+                        <h3 class="footer-section-title">Ocean View Beach Resort</h3>
+                        <p class="footer-section-desc">Experience luxury and adventure in beautiful Kalpitiya, Sri Lanka</p>
+                        <div class="footer-contact">
+                            <p class="footer-contact-item">
+                                <i class="fas fa-phone"></i> +94 77 123 4567
+                            </p>
+                            <p class="footer-contact-item">
+                                <i class="fas fa-envelope"></i> info@oceanviewresort.lk
+                            </p>
+                            <p class="footer-contact-item">
+                                <i class="fas fa-map-marker-alt"></i> Kalpitiya, Sri Lanka
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Quick Links -->
+                    <div class="footer-section footer-section-links">
+                        <h4 class="footer-section-subtitle">Quick Links</h4>
+                        <ul class="footer-links-list">
+                            <li><a href="#" data-page="home">Home</a></li>
+                            <li><a href="#" data-page="accommodation">Accommodation</a></li>
+                            <li><a href="#" data-page="events">Events</a></li>
+                            <li><a href="#" data-page="cuisine">Cuisine</a></li>
+                            <li><a href="#" data-page="contact">Contact</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Section 3: Events -->
+                    <div class="footer-section footer-section-events">
+                        <h4 class="footer-section-subtitle">Popular Events</h4>
+                        <ul class="footer-links-list">
+                            <li><a href="#" data-page="events/wilpattu-safari">Wilpattu Safari</a></li>
+                            <li><a href="#" data-page="events/kitesurfing">Kitesurfing</a></li>
+                            <li><a href="#" data-page="events/whale-watching">Whale Watching</a></li>
+                            <li><a href="#" data-page="events/dolphin-watching">Dolphin Watching</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Section 4: Social & Newsletter -->
+                    <div class="footer-section footer-section-social">
+                        <h4 class="footer-section-subtitle">Follow Us</h4>
+                        <div class="footer-social-links">
+                            <a href="#" class="footer-social-link" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="footer-social-link" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="footer-social-link" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="footer-social-link" title="YouTube">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="footer-newsletter">
+                            <h5 class="footer-newsletter-title">Newsletter</h5>
+                            <p class="footer-newsletter-desc">Subscribe for updates</p>
+                            <form class="footer-newsletter-form">
+                                <input type="email" class="footer-newsletter-input" placeholder="Your email" required>
+                                <button type="submit" class="footer-newsletter-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Footer Bottom -->
             <div class="footer-bottom">
-                <p>&copy; 2026 Ocean View Beach Resort. All rights reserved.</p>
+                <div class="container">
+                    <div class="footer-bottom-content">
+                        <p class="footer-bottom-text">&copy; 2026 Ocean View Beach Resort. All rights reserved.</p>
+                        <div class="footer-bottom-links">
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                            <a href="#">Sitemap</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
 
+    <!-- Scripts -->
+    <script src="js/navbar-scroll.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

@@ -1,4 +1,3 @@
-
 console.log("main.js loaded successfully!");
 
 $(document).ready(function() {
@@ -15,18 +14,43 @@ $(document).ready(function() {
         console.log("Navigation clicked, page:", page);
         if (page) {
             loadPage(page);
-            updateNavigation(page);
+            updateNavigation(page.split('/')[0]); // Handle sub-pages
         }
     });
     
+    // Dropdown link handler
+    $(document).on('click', '.dropdown-link', function(e) {
+        e.preventDefault();
+        const page = $(this).data('page');
+        console.log("Dropdown link clicked, page:", page);
+        if (page) {
+            loadPage(page);
+            updateNavigation(page.split('/')[0]);
+        }
+        
+        // Close mobile menu
+        $('.nav-menu').removeClass('active');
+        $('.hamburger').removeClass('active');
+    });
+    
     // Mobile menu toggle
-    $(document).on('click', '#hamburger', function() {
-        $('#nav-menu').toggleClass('active');
+    $(document).on('click', '.hamburger', function() {
+        $(this).toggleClass('active');
+        $('.nav-menu').toggleClass('active');
     });
     
     // Close mobile menu when clicking on a link
     $(document).on('click', '.nav-link', function() {
-        $('#nav-menu').removeClass('active');
+        $('.nav-menu').removeClass('active');
+        $('.hamburger').removeClass('active');
+    });
+    
+    // Close mobile menu when clicking outside
+    $(document).click(function(e) {
+        if (!$(e.target).closest('.navbar').length) {
+            $('.nav-menu').removeClass('active');
+            $('.hamburger').removeClass('active');
+        }
     });
 });
 
@@ -34,11 +58,23 @@ $(document).ready(function() {
 function loadPage(pageName) {
     console.log("loadPage function called with:", pageName);
     
-    // Validate page name
-    const validPages = ['home', 'accommodation', 'gallery', 'contact', 'reservation'];
-    if (!validPages.includes(pageName)) {
-        console.error("Invalid page name:", pageName);
-        pageName = 'home';
+    // Handle sub-pages (e.g., events/whale-watching)
+    let filePath = pageName;
+    let mainPage = pageName;
+    
+    if (pageName.includes('/')) {
+        const parts = pageName.split('/');
+        mainPage = parts[0];
+        // For sub-pages, use the folder structure: events/whale-watching.jsp
+        filePath = pageName; // Keep the original path
+    }
+    
+    // Validate main page name
+    const validPages = ['home', 'accommodation', 'events', 'gallery', 'contact', 'reservation'];
+    if (!validPages.includes(mainPage)) {
+        console.error("Invalid page name:", mainPage);
+        filePath = 'home';
+        mainPage = 'home';
     }
     
     // Show loading spinner
@@ -47,11 +83,11 @@ function loadPage(pageName) {
     
     // Load page content
     $.ajax({
-        url: `pages/${pageName}.jsp`,
+        url: `pages/${filePath}.jsp`,
         type: 'GET',
-        cache: false, // Prevent caching issues
+        cache: false,
         beforeSend: function() {
-            console.log("AJAX request starting for:", `pages/${pageName}.jsp`);
+            console.log("AJAX request starting for:", `pages/${filePath}.jsp`);
         },
         success: function(data) {
             console.log("AJAX success, data received:", data.length, "characters");
@@ -59,7 +95,7 @@ function loadPage(pageName) {
             $('#loading').hide();
             
             // Initialize page-specific functionality
-            initPageFunctions(pageName);
+            initPageFunctions(mainPage, pageName);
             
             // Update browser history
             if (window.history && window.history.pushState) {
@@ -87,6 +123,7 @@ function loadPage(pageName) {
                     <h2>Oops! Something went wrong</h2>
                     <p>${errorMessage}</p>
                     <p><strong>Error Details:</strong> ${error} (Status: ${xhr.status})</p>
+                    <p><strong>Requested URL:</strong> pages/${filePath}.jsp</p>
                     <button onclick="loadPage('home')" class="cta-button" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px;">Go Home</button>
                 </div>
             `).fadeIn(200);
@@ -98,7 +135,7 @@ function loadPage(pageName) {
 window.addEventListener('popstate', function(event) {
     if (event.state && event.state.page) {
         loadPage(event.state.page);
-        updateNavigation(event.state.page);
+        updateNavigation(event.state.page.split('/')[0]);
     }
 });
 
@@ -110,15 +147,15 @@ function updateNavigation(activePage) {
     
     // Update page title
     const pageTitle = activePage.charAt(0).toUpperCase() + activePage.slice(1);
-    document.title = `Hotel Booking - ${pageTitle}`;
+    document.title = `Ocean View Beach - ${pageTitle}`;
 }
 
 // Initialize page-specific functions
-function initPageFunctions(pageName) {
-    console.log("Initializing functions for page:", pageName);
+function initPageFunctions(pageName, fullPageName) {
+    console.log("Initializing functions for page:", pageName, "Full:", fullPageName);
     
     // Remove any existing event listeners to prevent duplicates
-    $('.cta-button, .book-btn, .gallery-filter, .gallery-item img').off();
+    $('.cta-button, .book-btn, .gallery-filter, .gallery-item img, .event-book-btn').off();
     
     switch(pageName) {
         case 'home':
@@ -126,6 +163,9 @@ function initPageFunctions(pageName) {
             break;
         case 'accommodation':
             initAccommodationFunctions();
+            break;
+        case 'events':
+            initEventsFunctions(fullPageName);
             break;
         case 'gallery':
             initGalleryFunctions();
@@ -150,14 +190,92 @@ function initHomePageFunctions() {
         console.log("CTA button clicked, page:", page);
         if (page) {
             loadPage(page);
-            updateNavigation(page);
+            updateNavigation(page.split('/')[0]);
         }
     });
     
-    // Hero slider or carousel initialization (if you have one)
-    if ($('.hero-slider').length) {
-        // Initialize your slider here
-    }
+    // Activity cards click handler
+    $(document).off('click.activity').on('click.activity', '.activity-card', function(e) {
+        e.preventDefault();
+        const activity = $(this).data('activity');
+        if (activity) {
+            loadPage(`events/${activity}`);
+            updateNavigation('events');
+        }
+    });
+}
+
+// Events page functions
+function initEventsFunctions(fullPageName) {
+    console.log("Initializing events page functions for:", fullPageName);
+    
+    // Event booking button handler
+    $(document).off('click.events').on('click.events', '.event-book-btn, .book-event-btn', function(e) {
+        e.preventDefault();
+        const eventType = $(this).data('event') || $(this).data('activity');
+        console.log("Event book button clicked, event:", eventType);
+        
+        loadPage('reservation');
+        updateNavigation('reservation');
+        
+        // Pre-select event type after page loads
+        setTimeout(() => {
+            if ($(`select[name="eventType"]`).length) {
+                $(`select[name="eventType"] option[value="${eventType}"]`).prop('selected', true);
+            }
+        }, 500);
+    });
+    
+    // Event filter functionality
+    $(document).off('click.event-filter').on('click.event-filter', '.event-filter', function(e) {
+        e.preventDefault();
+        $('.event-filter').removeClass('active');
+        $(this).addClass('active');
+        
+        const filter = $(this).data('filter');
+        console.log("Event filter clicked:", filter);
+        
+        if (filter === 'all') {
+            $('.event-card').fadeIn(300);
+        } else {
+            $('.event-card').fadeOut(300);
+            $(`.event-card[data-category="${filter}"]`).fadeIn(300);
+        }
+    });
+    
+    // Event details modal
+    $(document).off('click.event-details').on('click.event-details', '.event-details-btn', function(e) {
+        e.preventDefault();
+        const eventId = $(this).data('event-id');
+        showEventDetails(eventId);
+    });
+    
+    // Price calculator for events
+    $(document).off('change.event-calc').on('change.event-calc', '.event-participants', function() {
+        const participants = parseInt($(this).val()) || 1;
+        const pricePerPerson = parseFloat($(this).data('price')) || 0;
+        const total = participants * pricePerPerson;
+        $(this).closest('.event-card, .price-card').find('.total-price').text(`$${total.toFixed(2)}`);
+    });
+    
+    // Individual event page navigation
+    $(document).off('click.event-nav').on('click.event-nav', '.event-nav-btn', function(e) {
+        e.preventDefault();
+        const eventPage = $(this).data('event-page');
+        if (eventPage) {
+            loadPage(`events/${eventPage}`);
+            updateNavigation('events');
+        }
+    });
+}
+
+// Show event details in modal
+function showEventDetails(eventId) {
+    console.log("Showing event details for:", eventId);
+    
+    // Instead of modal, navigate to the specific event page
+    loadPage(`events/${eventId}`);
+    updateNavigation('events');
 }
 
 // Accommodation page functions
@@ -308,10 +426,54 @@ function initReservationFunctions() {
         calculateTotal();
     });
     
-    // Date change handlers
-    $(document).off('change.dates').on('change.dates', 'input[name="checkInDate"], input[name="checkOutDate"]', function() {
-        calculateTotal();
+    // Event type change handler
+    $(document).off('change.eventtype').on('change.eventtype', 'select[name="eventType"]', function() {
+        calculateEventTotal();
     });
+    
+    // Date change handlers
+    $(document).off('change.dates').on('change.dates', 'input[name="checkInDate"], input[name="checkOutDate"], input[name="eventDate"]', function() {
+        calculateTotal();
+        calculateEventTotal();
+    });
+    
+    // Participants change handler
+    $(document).off('change.participants').on('change.participants', 'input[name="participants"]', function() {
+        calculateEventTotal();
+    });
+}
+
+// Event total calculation
+function calculateEventTotal() {
+    const eventType = $('select[name="eventType"]').val();
+    const participants = parseInt($('input[name="participants"]').val()) || 1;
+    const eventDate = $('input[name="eventDate"]').val();
+    
+    console.log("Calculating event total - Event:", eventType, "Participants:", participants, "Date:", eventDate);
+    
+    const eventPrices = {
+        'whale-watching': 75,
+        'dolphin-watching': 50,
+        'kitesurfing': 80,
+        'snorkeling': 45,
+        'island-boat-tour': 60,
+        'wilpattu-safari': 120
+    };
+    
+    const pricePerPerson = eventPrices[eventType] || 0;
+    
+    if (pricePerPerson > 0 && participants > 0) {
+        const subtotal = participants * pricePerPerson;
+        const tax = subtotal * 0.1; // 10% tax
+        const total = subtotal + tax;
+        
+        $('#eventSubtotal').text(`$${subtotal.toFixed(2)}`);
+        $('#eventTax').text(`$${tax.toFixed(2)}`);
+        $('#eventTotal').text(`$${total.toFixed(2)}`);
+        $('#summaryParticipants').text(participants);
+        $('#summaryEventType').text($('select[name="eventType"] option:selected').text());
+        $('#summaryEventDate').text(eventDate || 'Not selected');
+    }
 }
 
 // Reservation form navigation
@@ -374,6 +536,7 @@ function updateBookingSummary() {
     $('#summaryCheckOut').text($('input[name="checkOutDate"]').val() || 'Not selected');
     
     calculateTotal();
+    calculateEventTotal();
 }
 
 function calculateTotal() {
@@ -439,10 +602,36 @@ $(document).on('submit', '#reservationForm', function(e) {
     $('#step1').fadeIn(300);
 });
 
+// Search functionality for events
+function searchEvents(query) {
+    console.log("Searching events for:", query);
+    const searchTerm = query.toLowerCase();
+    
+    $('.event-card').each(function() {
+        const title = $(this).find('.event-title').text().toLowerCase();
+        const description = $(this).find('.event-description').text().toLowerCase();
+        
+        if (title.includes(searchTerm) || description.includes(searchTerm)) {
+            $(this).fadeIn(300);
+        } else {
+            $(this).fadeOut(300);
+        }
+    });
+}
+
+// Add search functionality
+$(document).on('input', '.event-search', function() {
+    const query = $(this).val();
+    if (query.length >= 2) {
+        searchEvents(query);
+    } else if (query.length === 0) {
+        $('.event-card').fadeIn(300);
+    }
+});
+
 // Utility function to handle errors gracefully
 function handleError(error, context) {
     console.error(`Error in ${context}:`, error);
-    // You could send error reports to your server here
 }
 
 // Initialize error handling
