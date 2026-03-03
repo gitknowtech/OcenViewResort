@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<link rel="stylesheet" href="css/dolphin-watching.css">
+<link rel="stylesheet" href="css/events/dolphin-watching.css">
 
 <div class="section active" id="dolphin-watching">
     <div class="container">

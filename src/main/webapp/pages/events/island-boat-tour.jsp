@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<link rel="stylesheet" href="css/island-boat-tour.css">
+<link rel="stylesheet" href="css/events/island-boat-tour.css">
 
 <div class="section active" id="island-boat-tour">
     <div class="container">

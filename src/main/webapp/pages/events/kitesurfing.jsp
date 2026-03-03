@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<link rel="stylesheet" href="css/kitesurfing.css">
+<link rel="stylesheet" href="css/events/kitesurfing.css">
 
 <div class="section active" id="kitesurfing">
     <div class="container">

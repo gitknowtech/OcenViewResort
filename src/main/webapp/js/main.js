@@ -7,8 +7,8 @@ $(document).ready(function() {
     console.log("Loading home page...");
     loadPage('home');
     
-    // Navigation click handler - Use event delegation for better reliability
-    $(document).on('click', '.nav-link, [data-page]', function(e) {
+    // Navigation click handler - FIXED: Use correct navbar classes
+    $(document).on('click', '.navbar-link, [data-page]', function(e) {
         e.preventDefault();
         const page = $(this).data('page') || $(this).attr('data-page');
         console.log("Navigation clicked, page:", page);
@@ -18,8 +18,8 @@ $(document).ready(function() {
         }
     });
     
-    // Dropdown link handler
-    $(document).on('click', '.dropdown-link', function(e) {
+    // Dropdown link handler - FIXED: Use correct dropdown classes
+    $(document).on('click', '.navbar-dropdown-link', function(e) {
         e.preventDefault();
         const page = $(this).data('page');
         console.log("Dropdown link clicked, page:", page);
@@ -29,32 +29,32 @@ $(document).ready(function() {
         }
         
         // Close mobile menu
-        $('.nav-menu').removeClass('active');
-        $('.hamburger').removeClass('active');
+        $('.navbar-menu').removeClass('active');
+        $('.navbar-hamburger').removeClass('active');
     });
     
-    // Mobile menu toggle
-    $(document).on('click', '.hamburger', function() {
+    // Mobile menu toggle - FIXED: Use correct hamburger class
+    $(document).on('click', '.navbar-hamburger', function() {
         $(this).toggleClass('active');
-        $('.nav-menu').toggleClass('active');
+        $('.navbar-menu').toggleClass('active');
     });
     
     // Close mobile menu when clicking on a link
-    $(document).on('click', '.nav-link', function() {
-        $('.nav-menu').removeClass('active');
-        $('.hamburger').removeClass('active');
+    $(document).on('click', '.navbar-link', function() {
+        $('.navbar-menu').removeClass('active');
+        $('.navbar-hamburger').removeClass('active');
     });
     
     // Close mobile menu when clicking outside
     $(document).click(function(e) {
         if (!$(e.target).closest('.navbar').length) {
-            $('.nav-menu').removeClass('active');
-            $('.hamburger').removeClass('active');
+            $('.navbar-menu').removeClass('active');
+            $('.navbar-hamburger').removeClass('active');
         }
     });
 });
 
-// Load page content via AJAX
+// Load page content via AJAX - IMPROVED ERROR HANDLING
 function loadPage(pageName) {
     console.log("loadPage function called with:", pageName);
     
@@ -65,12 +65,11 @@ function loadPage(pageName) {
     if (pageName.includes('/')) {
         const parts = pageName.split('/');
         mainPage = parts[0];
-        // For sub-pages, use the folder structure: events/whale-watching.jsp
         filePath = pageName; // Keep the original path
     }
     
     // Validate main page name
-    const validPages = ['home', 'accommodation', 'events', 'gallery', 'contact', 'reservation'];
+    const validPages = ['home', 'accommodation', 'events', 'gallery', 'contact', 'reservation', 'login'];
     if (!validPages.includes(mainPage)) {
         console.error("Invalid page name:", mainPage);
         filePath = 'home';
@@ -86,45 +85,81 @@ function loadPage(pageName) {
         url: `pages/${filePath}.jsp`,
         type: 'GET',
         cache: false,
+        timeout: 10000, // 10 second timeout
         beforeSend: function() {
             console.log("AJAX request starting for:", `pages/${filePath}.jsp`);
         },
         success: function(data) {
             console.log("AJAX success, data received:", data.length, "characters");
-            $('#main-content').html(data).fadeIn(200);
-            $('#loading').hide();
             
-            // Initialize page-specific functionality
-            initPageFunctions(mainPage, pageName);
-            
-            // Update browser history
-            if (window.history && window.history.pushState) {
-                window.history.pushState({page: pageName}, '', `#${pageName}`);
+            // Check if data is actually HTML content
+            if (data && data.trim().length > 0) {
+                $('#main-content').html(data).fadeIn(200);
+                $('#loading').hide();
+                
+                // Initialize page-specific functionality
+                initPageFunctions(mainPage, pageName);
+                
+                // Update browser history
+                if (window.history && window.history.pushState) {
+                    window.history.pushState({page: pageName}, '', `#${pageName}`);
+                }
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                throw new Error('Empty response received');
             }
-            
-            // Scroll to top
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         },
         error: function(xhr, status, error) {
-            console.error("AJAX Error:", status, error);
-            console.error("Response:", xhr.responseText);
-            console.error("Status Code:", xhr.status);
+            console.error("AJAX Error Details:");
+            console.error("- Status:", status);
+            console.error("- Error:", error);
+            console.error("- HTTP Status:", xhr.status);
+            console.error("- Response Text:", xhr.responseText);
+            console.error("- Requested URL:", `pages/${filePath}.jsp`);
+            
             $('#loading').hide();
             
             let errorMessage = "Sorry, the requested page could not be loaded.";
-            if (xhr.status === 404) {
-                errorMessage = "Page not found. Please check if the JSP file exists.";
-            } else if (xhr.status === 500) {
-                errorMessage = "Server error. Please check your JSP file for syntax errors.";
+            let errorDetails = "";
+            
+            switch(xhr.status) {
+                case 404:
+                    errorMessage = "Page not found.";
+                    errorDetails = `The file 'pages/${filePath}.jsp' does not exist.`;
+                    break;
+                case 500:
+                    errorMessage = "Server error occurred.";
+                    errorDetails = "Please check your JSP file for syntax errors.";
+                    break;
+                case 0:
+                    errorMessage = "Network error.";
+                    errorDetails = "Please check your internet connection.";
+                    break;
+                default:
+                    errorDetails = `HTTP ${xhr.status}: ${error}`;
             }
             
             $('#main-content').html(`
-                <div class="error-message" style="text-align: center; padding: 50px; color: #721c24; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; margin: 20px;">
-                    <h2>Oops! Something went wrong</h2>
-                    <p>${errorMessage}</p>
-                    <p><strong>Error Details:</strong> ${error} (Status: ${xhr.status})</p>
-                    <p><strong>Requested URL:</strong> pages/${filePath}.jsp</p>
-                    <button onclick="loadPage('home')" class="cta-button" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px;">Go Home</button>
+                <div class="error-container">
+                    <div class="error-content">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h2>Oops! Something went wrong</h2>
+                        <p><strong>${errorMessage}</strong></p>
+                        <p>${errorDetails}</p>
+                        <div class="error-actions">
+                            <button onclick="loadPage('home')" class="btn-primary">Go Home</button>
+                            <button onclick="location.reload()" class="btn-secondary">Reload Page</button>
+                        </div>
+                        <details class="error-details">
+                            <summary>Technical Details</summary>
+                            <p><strong>Requested URL:</strong> pages/${filePath}.jsp</p>
+                            <p><strong>Status Code:</strong> ${xhr.status}</p>
+                            <p><strong>Error:</strong> ${error}</p>
+                            <p><strong>Response:</strong> ${xhr.responseText || 'No response'}</p>
+                        </details>
+                    </div>
                 </div>
             `).fadeIn(200);
         }
@@ -139,15 +174,15 @@ window.addEventListener('popstate', function(event) {
     }
 });
 
-// Update navigation active state
+// Update navigation active state - FIXED: Use correct navbar classes
 function updateNavigation(activePage) {
     console.log("Updating navigation for:", activePage);
-    $('.nav-link').removeClass('active');
-    $(`.nav-link[data-page="${activePage}"]`).addClass('active');
+    $('.navbar-link').removeClass('navbar-link-active');
+    $(`.navbar-link[data-page="${activePage}"]`).addClass('navbar-link-active');
     
     // Update page title
     const pageTitle = activePage.charAt(0).toUpperCase() + activePage.slice(1);
-    document.title = `Ocean View Beach - ${pageTitle}`;
+    document.title = `Ocean View Beach Resort - ${pageTitle}`;
 }
 
 // Initialize page-specific functions
@@ -176,7 +211,79 @@ function initPageFunctions(pageName, fullPageName) {
         case 'reservation':
             initReservationFunctions();
             break;
+        case 'login':
+            initLoginFunctions();
+            break;
     }
+}
+
+// ADD: Login page functions
+function initLoginFunctions() {
+    console.log("Initializing login page functions");
+    
+    // Password toggle functionality
+    $(document).off('click.login-toggle').on('click.login-toggle', '#toggle-password', function() {
+        const passwordInput = $('#password');
+        const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+        passwordInput.attr('type', type);
+        
+        const icon = $(this).find('i');
+        icon.toggleClass('fa-eye fa-eye-slash');
+    });
+    
+    // Form validation and submission
+    $(document).off('submit.login').on('submit.login', '.login-form', function(e) {
+        e.preventDefault();
+        
+        const email = $('#email').val();
+        const password = $('#password').val();
+        
+        // Clear previous errors
+        $('#email-error').text('');
+        $('#password-error').text('');
+        
+        let isValid = true;
+        
+        // Email validation
+        if (!email) {
+            $('#email-error').text('Email is required');
+            isValid = false;
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            $('#email-error').text('Please enter a valid email');
+            isValid = false;
+        }
+        
+        // Password validation
+        if (!password) {
+            $('#password-error').text('Password is required');
+            isValid = false;
+        } else if (password.length < 6) {
+            $('#password-error').text('Password must be at least 6 characters');
+            isValid = false;
+        }
+        
+        if (isValid) {
+            // Show loading state
+            const submitBtn = $('.login-submit-btn');
+            const originalText = submitBtn.html();
+            submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Signing In...').prop('disabled', true);
+            
+            // Simulate login process (replace with actual login logic)
+            setTimeout(() => {
+                // Reset button
+                submitBtn.html(originalText).prop('disabled', false);
+                
+                // Here you would typically handle the actual login
+                alert('Login functionality would be implemented here');
+            }, 2000);
+        }
+    });
+    
+    // Social login buttons
+    $(document).off('click.social').on('click.social', '.social-btn', function() {
+        const platform = $(this).hasClass('facebook-btn') ? 'Facebook' : 'Google';
+        alert(`${platform} login would be implemented here`);
+    });
 }
 
 // Home page functions
@@ -241,61 +348,6 @@ function initEventsFunctions(fullPageName) {
             $('.event-card').fadeOut(300);
             $(`.event-card[data-category="${filter}"]`).fadeIn(300);
         }
-    });
-    
-    // Event details modal
-    $(document).off('click.event-details').on('click.event-details', '.event-details-btn', function(e) {
-        e.preventDefault();
-        const eventId = $(this).data('event-id');
-        showEventDetails(eventId);
-    });
-    
-    // Price calculator for events
-    $(document).off('change.event-calc').on('change.event-calc', '.event-participants', function() {
-        const participants = parseInt($(this).val()) || 1;
-        const pricePerPerson = parseFloat($(this).data('price')) || 0;
-        const total = participants * pricePerPerson;
-        $(this).closest('.event-card, .price-card').find('.total-price').text(`$${total.toFixed(2)}`);
-    });
-    
-    // Individual event page navigation
-    $(document).off('click.event-nav').on('click.event-nav', '.event-nav-btn', function(e) {
-        e.preventDefault();
-        const eventPage = $(this).data('event-page');
-        if (eventPage) {
-            loadPage(`events/${eventPage}`);
-            updateNavigation('events');
-        }
-    });
-}
-
-// Show event details in modal
-function showEventDetails(eventId) {
-    console.log("Showing event details for:", eventId);
-    
-    // Instead of modal, navigate to the specific event page
-    loadPage(`events/${eventId}`);
-    updateNavigation('events');
-}
-
-// Accommodation page functions
-function initAccommodationFunctions() {
-    console.log("Initializing accommodation page functions");
-    
-    $(document).off('click.accommodation').on('click.accommodation', '.book-btn', function(e) {
-        e.preventDefault();
-        const roomType = $(this).data('room');
-        console.log("Book button clicked, room:", roomType);
-        
-        loadPage('reservation');
-        updateNavigation('reservation');
-        
-        // Pre-select room type after page loads
-        setTimeout(() => {
-            if ($(`select[name="roomType"]`).length) {
-                $(`select[name="roomType"] option[value="${roomType}"]`).prop('selected', true);
-            }
-        }, 500);
     });
 }
 
@@ -398,6 +450,27 @@ function initContactFunctions() {
     });
 }
 
+// Accommodation page functions
+function initAccommodationFunctions() {
+    console.log("Initializing accommodation page functions");
+    
+    $(document).off('click.accommodation').on('click.accommodation', '.book-btn', function(e) {
+        e.preventDefault();
+        const roomType = $(this).data('room');
+        console.log("Book button clicked, room:", roomType);
+        
+        loadPage('reservation');
+        updateNavigation('reservation');
+        
+        // Pre-select room type after page loads
+        setTimeout(() => {
+            if ($(`select[name="roomType"]`).length) {
+                $(`select[name="roomType"] option[value="${roomType}"]`).prop('selected', true);
+            }
+        }, 500);
+    });
+}
+
 // Reservation form functions
 function initReservationFunctions() {
     console.log("Initializing reservation page functions");
@@ -420,234 +493,106 @@ function initReservationFunctions() {
             $('input[name="checkOutDate"]').val('');
         }
     });
-    
-    // Room type change handler
-    $(document).off('change.roomtype').on('change.roomtype', 'select[name="roomType"]', function() {
-        calculateTotal();
-    });
-    
-    // Event type change handler
-    $(document).off('change.eventtype').on('change.eventtype', 'select[name="eventType"]', function() {
-        calculateEventTotal();
-    });
-    
-    // Date change handlers
-    $(document).off('change.dates').on('change.dates', 'input[name="checkInDate"], input[name="checkOutDate"], input[name="eventDate"]', function() {
-        calculateTotal();
-        calculateEventTotal();
-    });
-    
-    // Participants change handler
-    $(document).off('change.participants').on('change.participants', 'input[name="participants"]', function() {
-        calculateEventTotal();
-    });
 }
 
-// Event total calculation
-function calculateEventTotal() {
-    const eventType = $('select[name="eventType"]').val();
-    const participants = parseInt($('input[name="participants"]').val()) || 1;
-    const eventDate = $('input[name="eventDate"]').val();
-    
-    console.log("Calculating event total - Event:", eventType, "Participants:", participants, "Date:", eventDate);
-    
-    const eventPrices = {
-        'whale-watching': 75,
-        'dolphin-watching': 50,
-        'kitesurfing': 80,
-        'snorkeling': 45,
-        'island-boat-tour': 60,
-        'wilpattu-safari': 120
-    };
-    
-    const pricePerPerson = eventPrices[eventType] || 0;
-    
-    if (pricePerPerson > 0 && participants > 0) {
-        const subtotal = participants * pricePerPerson;
-        const tax = subtotal * 0.1; // 10% tax
-        const total = subtotal + tax;
-        
-        $('#eventSubtotal').text(`$${subtotal.toFixed(2)}`);
-        $('#eventTax').text(`$${tax.toFixed(2)}`);
-        $('#eventTotal').text(`$${total.toFixed(2)}`);
-        $('#summaryParticipants').text(participants);
-        $('#summaryEventType').text($('select[name="eventType"] option:selected').text());
-        $('#summaryEventDate').text(eventDate || 'Not selected');
-    }
-}
+// Make loadPage globally accessible
+window.loadPage = loadPage;
 
-// Reservation form navigation
-function nextStep(step) {
-    console.log("Moving to step:", step);
-    if (validateCurrentStep(step - 1)) {
-        $(`.form-step`).hide();
-        $(`#step${step}`).fadeIn(300);
-        
-        if (step === 3) {
-            updateBookingSummary();
-        }
-    }
-}
-
-function prevStep(step) {
-    console.log("Going back to step:", step);
-    $(`.form-step`).hide();
-    $(`#step${step}`).fadeIn(300);
-}
-
-function validateCurrentStep(step) {
-    console.log("Validating step:", step);
-    let isValid = true;
-    const currentStep = $(`#step${step}`);
-    
-    currentStep.find('input[required], select[required], textarea[required]').each(function() {
-        const value = $(this).val();
-        if (!value || value.trim() === '') {
-            $(this).addClass('error');
-            isValid = false;
-        } else {
-            $(this).removeClass('error');
-        }
-    });
-    
-    // Additional validation for email
-    const email = currentStep.find('input[type="email"]');
-    if (email.length && email.val()) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email.val())) {
-            email.addClass('error');
-            isValid = false;
-        }
-    }
-    
-    if (!isValid) {
-        alert('Please fill in all required fields correctly.');
-    }
-    
-    return isValid;
-}
-
-function updateBookingSummary() {
-    console.log("Updating booking summary");
-    $('#summaryName').text($('input[name="guestName"]').val() || 'Not specified');
-    $('#summaryEmail').text($('input[name="guestEmail"]').val() || 'Not specified');
-    $('#summaryRoom').text($('select[name="roomType"] option:selected').text() || 'Not selected');
-    $('#summaryCheckIn').text($('input[name="checkInDate"]').val() || 'Not selected');
-    $('#summaryCheckOut').text($('input[name="checkOutDate"]').val() || 'Not selected');
-    
-    calculateTotal();
-    calculateEventTotal();
-}
-
-function calculateTotal() {
-    const checkInValue = $('input[name="checkInDate"]').val();
-    const checkOutValue = $('input[name="checkOutDate"]').val();
-    const roomPrice = parseFloat($('select[name="roomType"] option:selected').data('price')) || 0;
-    
-    console.log("Calculating total - CheckIn:", checkInValue, "CheckOut:", checkOutValue, "Price:", roomPrice);
-    
-    if (checkInValue && checkOutValue && roomPrice > 0) {
-        const checkIn = new Date(checkInValue);
-        const checkOut = new Date(checkOutValue);
-        
-        if (checkOut > checkIn) {
-            const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-            const subtotal = nights * roomPrice;
-            const tax = subtotal * 0.1; // 10% tax
-            const total = subtotal + tax;
+// Add error container styles if not already present
+if (!$('style[data-error-styles]').length) {
+    $('head').append(`
+        <style data-error-styles>
+            .error-container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 60vh;
+                padding: 40px 20px;
+            }
             
-            $('#summaryNights').text(nights);
-            $('#summarySubtotal').text(`$${subtotal.toFixed(2)}`);
-            $('#summaryTax').text(`$${tax.toFixed(2)}`);
-            $('#summaryTotal').text(`$${total.toFixed(2)}`);
-        }
-    }
-}
-
-// Form submission
-$(document).on('submit', '#reservationForm', function(e) {
-    e.preventDefault();
-    console.log("Reservation form submitted");
-    
-    // Validate all steps
-    let allValid = true;
-    for (let i = 1; i <= 2; i++) {
-        if (!validateCurrentStep(i)) {
-            allValid = false;
-            break;
-        }
-    }
-    
-    if (!allValid) {
-        alert('Please complete all required fields in previous steps.');
-        return;
-    }
-    
-    // Collect all form data
-    const formData = new FormData(this);
-    const reservationData = {};
-    for (let [key, value] of formData.entries()) {
-        reservationData[key] = value;
-    }
-    
-    console.log("Reservation data:", reservationData);
-    
-    // Here you would normally send to server
-    // For demo purposes, just show success message
-    alert('Reservation submitted successfully! We will contact you shortly to confirm your booking.');
-    
-    // Reset form and go back to step 1
-    this.reset();
-    $('.form-step').hide();
-    $('#step1').fadeIn(300);
-});
-
-// Search functionality for events
-function searchEvents(query) {
-    console.log("Searching events for:", query);
-    const searchTerm = query.toLowerCase();
-    
-    $('.event-card').each(function() {
-        const title = $(this).find('.event-title').text().toLowerCase();
-        const description = $(this).find('.event-description').text().toLowerCase();
-        
-        if (title.includes(searchTerm) || description.includes(searchTerm)) {
-            $(this).fadeIn(300);
-        } else {
-            $(this).fadeOut(300);
-        }
-    });
-}
-
-// Add search functionality
-$(document).on('input', '.event-search', function() {
-    const query = $(this).val();
-    if (query.length >= 2) {
-        searchEvents(query);
-    } else if (query.length === 0) {
-        $('.event-card').fadeIn(300);
-    }
-});
-
-// Utility function to handle errors gracefully
-function handleError(error, context) {
-    console.error(`Error in ${context}:`, error);
-}
-
-// Initialize error handling
-window.addEventListener('error', function(e) {
-    handleError(e.error, 'Global error handler');
-});
-
-// Add loading states for better UX
-function showLoading(element) {
-    if (element) {
-        element.addClass('loading').prop('disabled', true);
-    }
-}
-
-function hideLoading(element) {
-    if (element) {
-        element.removeClass('loading').prop('disabled', false);
-    }
+            .error-content {
+                text-align: center;
+                max-width: 600px;
+                padding: 40px;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+            
+            .error-content i {
+                font-size: 4rem;
+                color: #ff6b6b;
+                margin-bottom: 20px;
+            }
+            
+            .error-content h2 {
+                color: #333;
+                margin-bottom: 15px;
+                font-size: 1.8rem;
+            }
+            
+            .error-content p {
+                color: #666;
+                margin-bottom: 15px;
+                line-height: 1.6;
+            }
+            
+            .error-actions {
+                margin: 20px 0;
+            }
+            
+            .btn-primary, .btn-secondary {
+                display: inline-block;
+                padding: 12px 24px;
+                margin: 5px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+            
+            .btn-primary {
+                background: #003366;
+                color: white;
+            }
+            
+            .btn-primary:hover {
+                background: #0066cc;
+                transform: translateY(-2px);
+            }
+            
+            .btn-secondary {
+                background: #6c757d;
+                color: white;
+            }
+            
+            .btn-secondary:hover {
+                background: #5a6268;
+                transform: translateY(-2px);
+            }
+            
+            .error-details {
+                margin-top: 20px;
+                text-align: left;
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #e9ecef;
+            }
+            
+            .error-details summary {
+                cursor: pointer;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+            
+            .error-details p {
+                margin: 5px 0;
+                font-family: monospace;
+                font-size: 0.9rem;
+            }
+        </style>
+    `);
 }

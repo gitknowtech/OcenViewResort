@@ -240,7 +240,8 @@
                     <a href="#" class="navbar-link" data-page="contact">CONTACT US</a>
                 </li>
                 <li class="navbar-item">
-                    <a href="login.jsp" class="navbar-link navbar-btn-login">
+                    <!-- CHANGED: Use data-page="login" instead of direct href -->
+                    <a href="#" class="navbar-link navbar-btn-login" data-page="login/login">
                         <i class="fas fa-sign-in-alt"></i> LOGIN
                     </a>
                 </li>

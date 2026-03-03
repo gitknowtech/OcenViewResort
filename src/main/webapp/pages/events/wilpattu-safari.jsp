@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<link rel="stylesheet" href="css/wilpattu-safari.css">
+<link rel="stylesheet" href="css/events/wilpattu-safari.css">
 
 <div class="section active" id="wilpattu-safari">
     <div class="container">
