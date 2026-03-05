@@ -100,38 +100,58 @@ public class UsersServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
     }
 
+    // ✅ GET ALL USERS - MATCHES YOUR ACTUAL TABLE STRUCTURE
     private void getAllUsers(PrintWriter out) {
         Connection conn = null;
         try {
             Class.forName(DB_DRIVER);
             conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
             
-            String sql = "SELECT id, name, email, phone, address, city, country, status FROM users ORDER BY id DESC";
+            System.out.println("✅ Database connection successful");
+            
+            String sql = "SELECT id, username, email, first_name, last_name, phone, city, country, created_at FROM users ORDER BY id DESC";
+            System.out.println("📋 Executing SQL: " + sql);
+            
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
             
             StringBuilder json = new StringBuilder("[");
             boolean first = true;
+            int count = 0;
             
             while (rs.next()) {
+                count++;
                 if (!first) json.append(",");
                 
+                int id = rs.getInt("id");
+                String username = rs.getString("username");
+                String email = rs.getString("email");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                String phone = rs.getString("phone");
+                String city = rs.getString("city");
+                String country = rs.getString("country");
+                String createdAt = rs.getString("created_at");
+                
+                System.out.println("📝 User " + count + ": " + firstName + " " + lastName + " (" + email + ")");
+                
                 json.append("{")
-                    .append("\"id\":").append(rs.getInt("id")).append(",")
-                    .append("\"name\":\"").append(escapeJson(rs.getString("name"))).append("\",")
-                    .append("\"email\":\"").append(escapeJson(rs.getString("email"))).append("\",")
-                    .append("\"phone\":\"").append(escapeJson(rs.getString("phone"))).append("\",")
-                    .append("\"address\":\"").append(escapeJson(rs.getString("address"))).append("\",")
-                    .append("\"city\":\"").append(escapeJson(rs.getString("city"))).append("\",")
-                    .append("\"country\":\"").append(escapeJson(rs.getString("country"))).append("\",")
-                    .append("\"status\":\"").append(escapeJson(rs.getString("status"))).append("\"")
+                    .append("\"id\":").append(id).append(",")
+                    .append("\"username\":\"").append(escapeJson(username)).append("\",")
+                    .append("\"email\":\"").append(escapeJson(email)).append("\",")
+                    .append("\"first_name\":\"").append(escapeJson(firstName)).append("\",")
+                    .append("\"last_name\":\"").append(escapeJson(lastName)).append("\",")
+                    .append("\"phone\":\"").append(escapeJson(phone)).append("\",")
+                    .append("\"city\":\"").append(escapeJson(city)).append("\",")
+                    .append("\"country\":\"").append(escapeJson(country)).append("\",")
+                    .append("\"created_at\":\"").append(escapeJson(createdAt)).append("\"")
                     .append("}");
                 
                 first = false;
             }
             
             json.append("]");
-            System.out.println("✅ getAllUsers: Returning records");
+            System.out.println("✅ getAllUsers: Returning " + count + " records");
             out.print(json.toString());
             
             rs.close();
@@ -145,6 +165,7 @@ public class UsersServlet extends HttpServlet {
         }
     }
 
+    // ✅ GET USER BY ID
     private void getUserById(PrintWriter out, String userId) {
         Connection conn = null;
         try {
@@ -160,23 +181,31 @@ public class UsersServlet extends HttpServlet {
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, Integer.parseInt(userId));
             
+            System.out.println("📋 Executing: SELECT user ID " + userId);
+            
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 StringBuilder json = new StringBuilder();
                 json.append("{\"success\":true,\"user\":{")
                     .append("\"id\":").append(rs.getInt("id")).append(",")
-                    .append("\"name\":\"").append(escapeJson(rs.getString("name"))).append("\",")
+                    .append("\"username\":\"").append(escapeJson(rs.getString("username"))).append("\",")
                     .append("\"email\":\"").append(escapeJson(rs.getString("email"))).append("\",")
+                    .append("\"first_name\":\"").append(escapeJson(rs.getString("first_name"))).append("\",")
+                    .append("\"last_name\":\"").append(escapeJson(rs.getString("last_name"))).append("\",")
                     .append("\"phone\":\"").append(escapeJson(rs.getString("phone"))).append("\",")
+                    .append("\"phone2\":\"").append(escapeJson(rs.getString("phone2"))).append("\",")
+                    .append("\"national_id\":\"").append(escapeJson(rs.getString("national_id"))).append("\",")
+                    .append("\"date_of_birth\":\"").append(escapeJson(rs.getString("date_of_birth"))).append("\",")
                     .append("\"address\":\"").append(escapeJson(rs.getString("address"))).append("\",")
                     .append("\"city\":\"").append(escapeJson(rs.getString("city"))).append("\",")
                     .append("\"country\":\"").append(escapeJson(rs.getString("country"))).append("\",")
-                    .append("\"status\":\"").append(escapeJson(rs.getString("status"))).append("\"")
+                    .append("\"created_at\":\"").append(escapeJson(rs.getString("created_at"))).append("\"")
                     .append("}}");
                 
                 System.out.println("✅ getUserById: Found user ID " + userId);
                 out.print(json.toString());
             } else {
+                System.out.println("⚠️ User ID " + userId + " not found");
                 out.print("{\"success\":false,\"message\":\"User not found\"}");
             }
             
@@ -191,52 +220,73 @@ public class UsersServlet extends HttpServlet {
         }
     }
 
+    // ✅ ADD USER
     private void addUser(HttpServletRequest request, PrintWriter out) {
         Connection conn = null;
         try {
-            String name = request.getParameter("name");
+            String username = request.getParameter("username");
             String email = request.getParameter("email");
+            String firstName = request.getParameter("first_name");
+            String lastName = request.getParameter("last_name");
             String phone = request.getParameter("phone");
+            String phone2 = request.getParameter("phone2");
+            String nationalId = request.getParameter("national_id");
+            String dateOfBirth = request.getParameter("date_of_birth");
             String address = request.getParameter("address");
             String city = request.getParameter("city");
             String country = request.getParameter("country");
-            String status = request.getParameter("status");
             
-            System.out.println("========== ADD USER DEBUG ==========");
-            System.out.println("name: " + name);
+            System.out.println("========== ADD USER ==========");
+            System.out.println("username: " + username);
             System.out.println("email: " + email);
+            System.out.println("first_name: " + firstName);
+            System.out.println("last_name: " + lastName);
             System.out.println("phone: " + phone);
-            System.out.println("address: " + address);
-            System.out.println("city: " + city);
-            System.out.println("country: " + country);
-            System.out.println("status: " + status);
-            System.out.println("====================================");
+            System.out.println("=============================");
             
-            if (name == null || name.trim().isEmpty()) {
-                out.print("{\"success\":false,\"message\":\"Name is required\"}");
+            if (username == null || username.trim().isEmpty()) {
+                out.print("{\"success\":false,\"message\":\"Username is required\"}");
                 return;
             }
             if (email == null || email.trim().isEmpty()) {
                 out.print("{\"success\":false,\"message\":\"Email is required\"}");
                 return;
             }
-            if (phone == null || phone.trim().isEmpty()) {
-                out.print("{\"success\":false,\"message\":\"Phone is required\"}");
+            if (firstName == null || firstName.trim().isEmpty()) {
+                out.print("{\"success\":false,\"message\":\"First Name is required\"}");
                 return;
             }
-            if (status == null || status.trim().isEmpty()) {
-                out.print("{\"success\":false,\"message\":\"Status is required\"}");
+            if (lastName == null || lastName.trim().isEmpty()) {
+                out.print("{\"success\":false,\"message\":\"Last Name is required\"}");
+                return;
+            }
+            if (phone == null || phone.trim().isEmpty()) {
+                out.print("{\"success\":false,\"message\":\"Phone is required\"}");
                 return;
             }
             
             Class.forName(DB_DRIVER);
             conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
             
-            // Check email
-            String checkSql = "SELECT id FROM users WHERE email = ?";
+            // Check username
+            String checkSql = "SELECT id FROM users WHERE username = ?";
             PreparedStatement checkStmt = conn.prepareStatement(checkSql);
-            checkStmt.setString(1, email.trim());
+            checkStmt.setString(1, username.trim());
             ResultSet rs = checkStmt.executeQuery();
+            if (rs.next()) {
+                out.print("{\"success\":false,\"message\":\"Username already exists\"}");
+                rs.close();
+                checkStmt.close();
+                return;
+            }
+            rs.close();
+            checkStmt.close();
+            
+            // Check email
+            checkSql = "SELECT id FROM users WHERE email = ?";
+            checkStmt = conn.prepareStatement(checkSql);
+            checkStmt.setString(1, email.trim());
+            rs = checkStmt.executeQuery();
             if (rs.next()) {
                 out.print("{\"success\":false,\"message\":\"Email already exists\"}");
                 rs.close();
@@ -247,17 +297,23 @@ public class UsersServlet extends HttpServlet {
             checkStmt.close();
             
             // Insert user
-            String sql = "INSERT INTO users (name, email, phone, address, city, country, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO users (username, email, password, first_name, last_name, phone, phone2, national_id, date_of_birth, address, city, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            stmt.setString(1, name.trim());
+            stmt.setString(1, username.trim());
             stmt.setString(2, email.trim());
-            stmt.setString(3, phone.trim());
-            stmt.setString(4, address != null ? address.trim() : "");
-            stmt.setString(5, city != null ? city.trim() : "");
-            stmt.setString(6, country != null ? country.trim() : "");
-            stmt.setString(7, status.trim());
+            stmt.setString(3, "default123"); // Default password - should be hashed in production
+            stmt.setString(4, firstName.trim());
+            stmt.setString(5, lastName.trim());
+            stmt.setString(6, phone.trim());
+            stmt.setString(7, phone2 != null ? phone2.trim() : "");
+            stmt.setString(8, nationalId != null ? nationalId.trim() : "");
+            stmt.setString(9, dateOfBirth != null ? dateOfBirth.trim() : null);
+            stmt.setString(10, address != null ? address.trim() : "");
+            stmt.setString(11, city != null ? city.trim() : "");
+            stmt.setString(12, country != null ? country.trim() : "Sri Lanka");
             
-            stmt.executeUpdate();
+            int rows = stmt.executeUpdate();
+            System.out.println("✅ Rows inserted: " + rows);
             
             rs = stmt.getGeneratedKeys();
             int userId = -1;
@@ -283,6 +339,7 @@ public class UsersServlet extends HttpServlet {
         }
     }
 
+    // ✅ UPDATE USER
     private void updateUser(HttpServletRequest request, PrintWriter out) {
         Connection conn = null;
         try {
@@ -293,40 +350,42 @@ public class UsersServlet extends HttpServlet {
             }
             
             int id = Integer.parseInt(idStr);
-            String name = request.getParameter("name");
+            String firstName = request.getParameter("first_name");
+            String lastName = request.getParameter("last_name");
             String phone = request.getParameter("phone");
+            String phone2 = request.getParameter("phone2");
+            String nationalId = request.getParameter("national_id");
+            String dateOfBirth = request.getParameter("date_of_birth");
             String address = request.getParameter("address");
             String city = request.getParameter("city");
             String country = request.getParameter("country");
-            String status = request.getParameter("status");
             
-            System.out.println("========== UPDATE USER DEBUG ==========");
+            System.out.println("========== UPDATE USER ==========");
             System.out.println("id: " + id);
-            System.out.println("name: " + name);
-            System.out.println("phone: " + phone);
-            System.out.println("address: " + address);
-            System.out.println("city: " + city);
-            System.out.println("country: " + country);
-            System.out.println("status: " + status);
-            System.out.println("========================================");
+            System.out.println("first_name: " + firstName);
+            System.out.println("last_name: " + lastName);
+            System.out.println("================================");
             
             Class.forName(DB_DRIVER);
             conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
             
-            String sql = "UPDATE users SET name=?, phone=?, address=?, city=?, country=?, status=? WHERE id=?";
+            String sql = "UPDATE users SET first_name=?, last_name=?, phone=?, phone2=?, national_id=?, date_of_birth=?, address=?, city=?, country=? WHERE id=?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, name.trim());
-            stmt.setString(2, phone.trim());
-            stmt.setString(3, address != null ? address.trim() : "");
-            stmt.setString(4, city != null ? city.trim() : "");
-            stmt.setString(5, country != null ? country.trim() : "");
-            stmt.setString(6, status.trim());
-            stmt.setInt(7, id);
+            stmt.setString(1, firstName.trim());
+            stmt.setString(2, lastName.trim());
+            stmt.setString(3, phone.trim());
+            stmt.setString(4, phone2 != null ? phone2.trim() : "");
+            stmt.setString(5, nationalId != null ? nationalId.trim() : "");
+            stmt.setString(6, dateOfBirth != null ? dateOfBirth.trim() : null);
+            stmt.setString(7, address != null ? address.trim() : "");
+            stmt.setString(8, city != null ? city.trim() : "");
+            stmt.setString(9, country != null ? country.trim() : "Sri Lanka");
+            stmt.setInt(10, id);
             
-            stmt.executeUpdate();
+            int rows = stmt.executeUpdate();
+            System.out.println("✅ Rows updated: " + rows);
             stmt.close();
             
-            System.out.println("✅ User updated");
             out.print("{\"success\":true,\"message\":\"✅ User updated successfully!\"}");
         } catch (Exception e) {
             System.out.println("❌ updateUser Error: " + e.getMessage());
@@ -337,6 +396,7 @@ public class UsersServlet extends HttpServlet {
         }
     }
 
+    // ✅ DELETE USER
     private void deleteUser(HttpServletRequest request, PrintWriter out) {
         Connection conn = null;
         try {
@@ -348,9 +408,9 @@ public class UsersServlet extends HttpServlet {
             
             int id = Integer.parseInt(idStr);
             
-            System.out.println("========== DELETE USER DEBUG ==========");
+            System.out.println("========== DELETE USER ==========");
             System.out.println("id: " + id);
-            System.out.println("========================================");
+            System.out.println("================================");
             
             Class.forName(DB_DRIVER);
             conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
@@ -358,10 +418,10 @@ public class UsersServlet extends HttpServlet {
             String sql = "DELETE FROM users WHERE id=?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
-            stmt.executeUpdate();
+            int rows = stmt.executeUpdate();
+            System.out.println("✅ Rows deleted: " + rows);
             stmt.close();
             
-            System.out.println("✅ User deleted");
             out.print("{\"success\":true,\"message\":\"✅ User deleted successfully!\"}");
         } catch (Exception e) {
             System.out.println("❌ deleteUser Error: " + e.getMessage());

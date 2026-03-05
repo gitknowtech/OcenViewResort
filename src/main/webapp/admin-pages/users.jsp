@@ -24,14 +24,12 @@
     .btn-delete:hover { background: #fecaca; }
     input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; margin-bottom: 15px; font-size: 14px; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    input:disabled { background: #f3f4f6; cursor: not-allowed; }
     .msg { position: fixed; top: 20px; right: 20px; padding: 15px 20px; border-radius: 8px; color: white; display: none; z-index: 9999; font-weight: 600; }
     .msg.success { background: #10b981; }
     .msg.error { background: #ef4444; }
     .msg.show { display: block; animation: slideIn 0.3s ease; }
     @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-    .badge-active { background: #d1fae5; color: #065f46; }
-    .badge-inactive { background: #fee2e2; color: #991b1b; }
     @media (max-width: 1400px) { .container { grid-template-columns: 1fr; } }
 </style>
 
@@ -39,17 +37,17 @@
 
 <div class="container">
     <div class="card">
-        <div class="card-title">👥 Users Management (Website Customers)</div>
+        <div class="card-title">👥 Website Users (Customers)</div>
         <input type="text" id="search" placeholder="🔍 Search...">
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Username</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>City</th>
-                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -63,18 +61,18 @@
         <div class="card-title" id="formTitle">➕ Add User</div>
         <input type="hidden" id="userId">
         <input type="hidden" id="mode" value="add">
-        <input type="text" id="name" placeholder="Full Name" required>
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="tel" id="phone" placeholder="Phone Number" required>
-        <input type="text" id="address" placeholder="Address">
-        <input type="text" id="city" placeholder="City">
-        <input type="text" id="country" placeholder="Country">
         
-        <select id="status" required>
-            <option value="">Select Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-        </select>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="text" id="first_name" placeholder="First Name" required>
+        <input type="text" id="last_name" placeholder="Last Name" required>
+        <input type="tel" id="phone" placeholder="Phone Number" required>
+        <input type="tel" id="phone2" placeholder="Phone 2 (Optional)">
+        <input type="text" id="national_id" placeholder="National ID (Optional)">
+        <input type="date" id="date_of_birth" placeholder="Date of Birth (Optional)">
+        <textarea id="address" placeholder="Address (Optional)" rows="2"></textarea>
+        <input type="text" id="city" placeholder="City (Optional)">
+        <input type="text" id="country" placeholder="Country" value="Sri Lanka">
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <button class="btn btn-primary" id="submitBtn"><i class="fas fa-save"></i> Add User</button>

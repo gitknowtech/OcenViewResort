@@ -28,11 +28,11 @@ function loadUsers() {
                 data.forEach(user => {
                     html += '<tr>';
                     html += '<td><strong>#' + user.id + '</strong></td>';
-                    html += '<td>' + user.name + '</td>';
+                    html += '<td>' + user.username + '</td>';
+                    html += '<td>' + user.first_name + ' ' + user.last_name + '</td>';
                     html += '<td>' + user.email + '</td>';
                     html += '<td>' + user.phone + '</td>';
                     html += '<td>' + (user.city || '-') + '</td>';
-                    html += '<td><span class="badge badge-' + user.status + '">' + user.status.toUpperCase() + '</span></td>';
                     html += '<td>';
                     html += '<button class="btn btn-small btn-view" onclick="viewUser(' + user.id + ')" title="View"><i class="fas fa-eye"></i></button>';
                     html += '<button class="btn btn-small btn-edit" onclick="editUser(' + user.id + ')" title="Edit"><i class="fas fa-edit"></i></button>';
@@ -61,7 +61,7 @@ function viewUser(id) {
         .then(d => {
             if (d.success) {
                 const u = d.user;
-                alert('👤 USER DETAILS\n\nID: ' + u.id + '\nName: ' + u.name + '\nEmail: ' + u.email + '\nPhone: ' + u.phone + '\nAddress: ' + (u.address || 'N/A') + '\nCity: ' + (u.city || 'N/A') + '\nCountry: ' + (u.country || 'N/A') + '\nStatus: ' + u.status);
+                alert('👤 USER DETAILS\n\nID: ' + u.id + '\nUsername: ' + u.username + '\nName: ' + u.first_name + ' ' + u.last_name + '\nEmail: ' + u.email + '\nPhone: ' + u.phone + '\nPhone 2: ' + (u.phone2 || 'N/A') + '\nNational ID: ' + (u.national_id || 'N/A') + '\nDOB: ' + (u.date_of_birth || 'N/A') + '\nAddress: ' + (u.address || 'N/A') + '\nCity: ' + (u.city || 'N/A') + '\nCountry: ' + u.country);
             } else {
                 showUsersMsg('❌ Error loading user', 'error');
             }
@@ -83,17 +83,22 @@ function editUser(id) {
                 const u = d.user;
                 document.getElementById('userId').value = u.id;
                 document.getElementById('mode').value = 'edit';
-                document.getElementById('name').value = u.name;
+                document.getElementById('username').value = u.username;
+                document.getElementById('username').disabled = true;
                 document.getElementById('email').value = u.email;
                 document.getElementById('email').disabled = true;
+                document.getElementById('first_name').value = u.first_name;
+                document.getElementById('last_name').value = u.last_name;
                 document.getElementById('phone').value = u.phone;
+                document.getElementById('phone2').value = u.phone2 || '';
+                document.getElementById('national_id').value = u.national_id || '';
+                document.getElementById('date_of_birth').value = u.date_of_birth || '';
                 document.getElementById('address').value = u.address || '';
                 document.getElementById('city').value = u.city || '';
-                document.getElementById('country').value = u.country || '';
-                document.getElementById('status').value = u.status;
-                document.getElementById('formTitle').textContent = '✏️ Edit - ' + u.name;
+                document.getElementById('country').value = u.country || 'Sri Lanka';
+                document.getElementById('formTitle').textContent = '✏️ Edit - ' + u.first_name + ' ' + u.last_name;
                 document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update User';
-                showUsersMsg('📝 Editing: ' + u.name, 'success');
+                showUsersMsg('📝 Editing: ' + u.first_name + ' ' + u.last_name, 'success');
                 document.querySelector('.card:last-child').scrollIntoView({ behavior: 'smooth' });
             } else {
                 showUsersMsg('❌ Error loading user', 'error');
@@ -140,30 +145,38 @@ function deleteUser(id) {
 
 function submitUserForm() {
     const mode = document.getElementById('mode').value;
-    const name = document.getElementById('name').value.trim();
+    const username = document.getElementById('username').value.trim();
     const email = document.getElementById('email').value.trim();
+    const first_name = document.getElementById('first_name').value.trim();
+    const last_name = document.getElementById('last_name').value.trim();
     const phone = document.getElementById('phone').value.trim();
+    const phone2 = document.getElementById('phone2').value.trim();
+    const national_id = document.getElementById('national_id').value.trim();
+    const date_of_birth = document.getElementById('date_of_birth').value.trim();
     const address = document.getElementById('address').value.trim();
     const city = document.getElementById('city').value.trim();
     const country = document.getElementById('country').value.trim();
-    const status = document.getElementById('status').value.trim();
     
-    console.log('📝 Submitting form:', { mode, name, email, phone, status });
+    console.log('📝 Submitting form:', { mode, username, email, first_name, last_name, phone });
     
-    if (!name || !email || !phone || !status) {
-        showUsersMsg('❌ Name, Email, Phone, and Status are required', 'error');
+    if (!username || !email || !first_name || !last_name || !phone) {
+        showUsersMsg('❌ Username, Email, First Name, Last Name, and Phone are required', 'error');
         return;
     }
     
     const params = new URLSearchParams();
     params.append('action', mode === 'add' ? 'add' : 'update');
-    params.append('name', name);
+    params.append('username', username);
     params.append('email', email);
+    params.append('first_name', first_name);
+    params.append('last_name', last_name);
     params.append('phone', phone);
+    params.append('phone2', phone2);
+    params.append('national_id', national_id);
+    params.append('date_of_birth', date_of_birth);
     params.append('address', address);
     params.append('city', city);
     params.append('country', country);
-    params.append('status', status);
     if (mode === 'edit') params.append('id', document.getElementById('userId').value);
     
     const url = USERS_BASE_URL + USERS_CONTEXT_PATH + '/users';
@@ -199,14 +212,19 @@ function submitUserForm() {
 function resetUserForm() {
     document.getElementById('userId').value = '';
     document.getElementById('mode').value = 'add';
-    document.getElementById('name').value = '';
+    document.getElementById('username').value = '';
+    document.getElementById('username').disabled = false;
     document.getElementById('email').value = '';
     document.getElementById('email').disabled = false;
+    document.getElementById('first_name').value = '';
+    document.getElementById('last_name').value = '';
     document.getElementById('phone').value = '';
+    document.getElementById('phone2').value = '';
+    document.getElementById('national_id').value = '';
+    document.getElementById('date_of_birth').value = '';
     document.getElementById('address').value = '';
     document.getElementById('city').value = '';
-    document.getElementById('country').value = '';
-    document.getElementById('status').value = 'active';
+    document.getElementById('country').value = 'Sri Lanka';
     document.getElementById('formTitle').textContent = '➕ Add User';
     document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Add User';
     showUsersMsg('✅ Form cleared', 'success');

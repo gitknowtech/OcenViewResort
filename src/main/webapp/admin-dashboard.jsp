@@ -18,11 +18,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Ocean View</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
-    <!-- ✅ LOAD EXTERNAL SCRIPTS -->
+    <!-- ✅ LOAD ALL EXTERNAL SCRIPTS -->
     <script src="js/staff-manager.js"></script>
     <script src="js/rooms-manager.js"></script>
     <script src="js/users-manager.js"></script>
+    <script src="js/reservations-manager.js"></script>
     
     <style>
         /* ============================================
@@ -76,7 +79,6 @@
             padding: 0;
         }
         
-        /* Sidebar scrollbar */
         .admin-sidebar::-webkit-scrollbar {
             width: 6px;
         }
@@ -416,7 +418,6 @@
             background: #f5f7fa;
         }
         
-        /* Main content scrollbar */
         .admin-main::-webkit-scrollbar {
             width: 8px;
         }
@@ -630,6 +631,7 @@
     <script>
         class AdminDashboard {
             constructor() {
+                this.contextPath = '/OceanViewResort'; // ✅ SET YOUR PROJECT NAME HERE
                 this.titles = { 
                     dashboard: '📊 Dashboard', 
                     staff: '👔 Staff', 
@@ -649,6 +651,7 @@
             
             init() {
                 console.log('🔧 Initializing Admin Dashboard...');
+                console.log('📍 Context Path:', this.contextPath);
                 this.setupUserInfo();
                 this.attachEventListeners();
                 this.loadPage('dashboard');
@@ -657,11 +660,8 @@
             setupUserInfo() {
                 const firstLetter = (this.adminUser.name || 'A').charAt(0).toUpperCase();
                 
-                // Update sidebar
                 document.getElementById('sidebarUserAvatar').textContent = firstLetter;
                 document.getElementById('sidebarUserName').textContent = this.adminUser.name;
-                
-                // Update dropdown
                 document.getElementById('sidebarUserDropdownName').textContent = this.adminUser.name;
                 document.getElementById('sidebarUserDropdownEmail').textContent = this.adminUser.email;
                 
@@ -669,7 +669,6 @@
             }
             
             attachEventListeners() {
-                // Sidebar menu clicks
                 document.querySelectorAll('.sidebar-menu-link').forEach(link => {
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -678,7 +677,6 @@
                     });
                 });
                 
-                // Dropdown menu items
                 document.querySelectorAll('.sidebar-user-dropdown-item').forEach(item => {
                     item.addEventListener('click', (e) => {
                         const page = item.dataset.page;
@@ -693,16 +691,14 @@
             loadPage(page) {
                 console.log('📄 Loading page:', page);
                 
-                // Update sidebar active state
                 document.querySelectorAll('.sidebar-menu-link').forEach(l => l.classList.remove('active'));
-                document.querySelector('[data-page="' + page + '"]').classList.add('active');
+                const activeLink = document.querySelector('[data-page="' + page + '"]');
+                if (activeLink) activeLink.classList.add('active');
                 
-                // Update title
                 const titleText = this.titles[page] || page;
                 document.getElementById('pageTitle').textContent = titleText;
                 document.getElementById('pageBreadcrumb').textContent = 'Home / ' + titleText.replace(/[📊👔👥🚪📅📈]/g, '').trim();
                 
-                // Show loading
                 document.getElementById('mainContent').innerHTML = `
                     <div class="loading">
                         <div class="spinner"></div>
@@ -710,13 +706,18 @@
                     </div>
                 `;
                 
-                // Fetch page
-                fetch('admin-pages/' + page + '.jsp')
+                // ✅ FIXED: Use absolute path with context root
+                const pageUrl = this.contextPath + '/admin-pages/' + page + '.jsp';
+                console.log('📥 Fetching from:', pageUrl);
+                
+                fetch(pageUrl)
                     .then(r => {
-                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        console.log('📊 Response status:', r.status);
+                        if (!r.ok) throw new Error('HTTP ' + r.status + ' - Page not found at ' + pageUrl);
                         return r.text();
                     })
                     .then(html => {
+                        console.log('✅ Page loaded successfully');
                         document.getElementById('mainContent').innerHTML = '<div class="page-content">' + html + '</div>';
                         this.initPageScripts(page);
                     })
@@ -725,8 +726,9 @@
                         document.getElementById('mainContent').innerHTML = `
                             <div class="error-container">
                                 <i class="fas fa-exclamation-circle"></i>
-                                <p><strong>Error loading page</strong></p>
+                                <p><strong>Error loading ${page}</strong></p>
                                 <p>${e.message}</p>
+                                <p style="margin-top: 10px; font-size: 11px; color: #666;">URL: ${pageUrl}</p>
                             </div>
                         `;
                     });
@@ -734,6 +736,10 @@
             
             initPageScripts(page) {
                 console.log('🔧 Initializing scripts for:', page);
+                
+                if (page === 'dashboard' && typeof loadDashboardData === 'function') {
+                    setTimeout(() => loadDashboardData(), 100);
+                }
                 
                 if (page === 'staff' && typeof initStaffPage === 'function') {
                     setTimeout(() => initStaffPage(), 100);
@@ -746,8 +752,11 @@
                 if (page === 'users' && typeof initUsersPage === 'function') {
                     setTimeout(() => initUsersPage(), 100);
                 }
+                
+                if (page === 'reservations' && typeof initReservationsPage === 'function') {
+                    setTimeout(() => initReservationsPage(), 100);
+                }
             }
-
         }
         
         // ✅ LOGOUT FUNCTION
