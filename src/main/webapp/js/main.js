@@ -1,11 +1,14 @@
 console.log("main.js loaded successfully!");
 
+// Global variables for user state
+let currentUser = null;
+let isUserLoggedIn = false;
+
 $(document).ready(function() {
     console.log("jQuery ready function called");
     
-    // Load home page by default
-    console.log("Loading home page...");
-    loadPage('home');
+    // Check user status first, then load home page
+    checkUserStatusOnLoad();
     
     // Navigation click handler - EXCLUDE signup form links to prevent redirect
     $(document).on('click', '.navbar-link, [data-page]:not(.signup-form [data-page]):not(.signup-form a[data-page])', function(e) {
@@ -53,6 +56,122 @@ $(document).ready(function() {
         }
     });
 });
+
+// Check user status on page load
+function checkUserStatusOnLoad() {
+    console.log('🔍 Checking user status on page load...');
+    
+    $.ajax({
+        url: 'checkUser',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            console.log('📊 User status response:', data);
+            
+            if (data.loggedIn) {
+                currentUser = data.user;
+                isUserLoggedIn = true;
+                updateNavbarForLoggedInUser(data.user);
+                
+                if (data.autoLogin) {
+                    showMessage('🎉 Welcome back, ' + data.user.name + '! Auto-logged in.', 'info');
+                }
+            } else {
+                currentUser = null;
+                isUserLoggedIn = false;
+                updateNavbarForLoggedOutUser();
+            }
+            
+            // Load home page after user status check
+            loadPage('home');
+        },
+        error: function(xhr, status, error) {
+            console.error('❌ Error checking user status:', error);
+            currentUser = null;
+            isUserLoggedIn = false;
+            updateNavbarForLoggedOutUser();
+            loadPage('home');
+        }
+    });
+}
+
+// Update navbar for logged in user
+function updateNavbarForLoggedInUser(user) {
+    console.log('✅ Updating navbar for logged in user:', user);
+    
+    const loginSection = $('#navbarLoginSection');
+    const userAvatar = $('#navbarUserAvatar');
+    const userName = $('#navbarUserName');
+    const userEmail = $('#navbarUserEmail');
+    const dropdownName = $('#navbarUserDropdownName');
+    const dropdownEmail = $('#navbarUserDropdownEmail');
+    
+    if (loginSection.length && userAvatar.length && userName.length && userEmail.length) {
+        // Switch to logged in state
+        loginSection.removeClass('logged-out').addClass('logged-in');
+        
+        // Update user info
+        const displayName = user.name || user.email.split('@')[0];
+        const firstLetter = displayName.charAt(0).toUpperCase();
+        
+        userAvatar.text(firstLetter);
+        userName.text(displayName);
+        userEmail.text(user.email);
+        
+        if (dropdownName.length) dropdownName.text(displayName);
+        if (dropdownEmail.length) dropdownEmail.text(user.email);
+        
+        console.log('✅ Navbar updated for user:', displayName);
+    }
+}
+
+// Update navbar for logged out user
+function updateNavbarForLoggedOutUser() {
+    console.log('📝 Updating navbar for logged out user');
+    
+    const loginSection = $('#navbarLoginSection');
+    if (loginSection.length) {
+        loginSection.removeClass('logged-in').addClass('logged-out');
+    }
+}
+
+// Global logout function
+window.logoutUser = function() {
+    if (!confirm('Are you sure you want to logout?')) return;
+    
+    console.log('👋 Logging out user...');
+    
+    $.ajax({
+        url: 'logout',
+        type: 'POST',
+        dataType: 'json',
+        success: function(data) {
+            if (data.success) {
+                console.log('✅ Logout successful');
+                
+                // Update global state
+                currentUser = null;
+                isUserLoggedIn = false;
+                
+                // Update navbar
+                updateNavbarForLoggedOutUser();
+                
+                // Show success message
+                showMessage('👋 ' + data.message, 'info');
+                
+                // Redirect to home page
+                loadPage('home');
+            } else {
+                console.error('❌ Logout failed:', data.message);
+                showMessage('❌ Error during logout', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('❌ Logout error:', error);
+            showMessage('⚠️ Network error during logout', 'error');
+        }
+    });
+};
 
 // Load page content via AJAX - IMPROVED ERROR HANDLING
 function loadPage(pageName) {
@@ -217,9 +336,9 @@ function initPageFunctions(pageName, fullPageName) {
     }
 }
 
-// ADD: Login page functions - UPDATED to handle signup forms
+// FIXED: Login page functions - DO NOT HANDLE FORM SUBMISSION
 function initLoginFunctions() {
-    console.log("Initializing login page functions");
+    console.log("Initializing login page functions - DELEGATED VERSION");
     
     // Handle signup form login links separately (prevent main navigation interference)
     $(document).off('click.signup-login').on('click.signup-login', '.signup-form [data-page], .signup-form a[data-page]', function(e) {
@@ -233,68 +352,44 @@ function initLoginFunctions() {
         }
     });
     
-    // Password toggle functionality
-    $(document).off('click.login-toggle').on('click.login-toggle', '#toggle-password', function() {
-        const passwordInput = $('#password');
-        const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
-        passwordInput.attr('type', type);
-        
-        const icon = $(this).find('i');
-        icon.toggleClass('fa-eye fa-eye-slash');
-    });
+    // DO NOT HANDLE LOGIN FORM - Let login page script handle it
+    console.log("✅ Login functions initialized - form handling delegated to login page");
+}
+
+// Message function
+function showMessage(text, type) {
+    console.log(`${type.toUpperCase()}: ${text}`);
     
-    // Form validation and submission
-    $(document).off('submit.login').on('submit.login', '.login-form', function(e) {
-        e.preventDefault();
-        
-        const email = $('#email').val();
-        const password = $('#password').val();
-        
-        // Clear previous errors
-        $('#email-error').text('');
-        $('#password-error').text('');
-        
-        let isValid = true;
-        
-        // Email validation
-        if (!email) {
-            $('#email-error').text('Email is required');
-            isValid = false;
-        } else if (!/\S+@\S+\.\S+/.test(email)) {
-            $('#email-error').text('Please enter a valid email');
-            isValid = false;
-        }
-        
-        // Password validation
-        if (!password) {
-            $('#password-error').text('Password is required');
-            isValid = false;
-        } else if (password.length < 6) {
-            $('#password-error').text('Password must be at least 6 characters');
-            isValid = false;
-        }
-        
-        if (isValid) {
-            // Show loading state
-            const submitBtn = $('.login-submit-btn');
-            const originalText = submitBtn.html();
-            submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Signing In...').prop('disabled', true);
-            
-            // Simulate login process (replace with actual login logic)
-            setTimeout(() => {
-                // Reset button
-                submitBtn.html(originalText).prop('disabled', false);
-                
-                // Here you would typically handle the actual login
-                alert('Login functionality would be implemented here');
-            }, 2000);
-        }
-    });
+    // Remove existing messages
+    $('.main-message').remove();
     
-    // Social login buttons
-    $(document).off('click.social').on('click.social', '.social-btn', function() {
-        const platform = $(this).hasClass('facebook-btn') ? 'Facebook' : 'Google';
-        alert(`${platform} login would be implemented here`);
+    // Create message element
+    const messageClass = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+    const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+    
+    const msg = $(`
+        <div class="main-message ${messageClass}" style="
+            position: fixed; top: 20px; right: 20px; z-index: 9999;
+            padding: 15px 20px; border-radius: 8px; color: white; font-weight: bold;
+            background: ${bgColor}; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease-out; min-width: 250px;
+        ">${text}</div>
+    `);
+    
+    $('body').append(msg);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        msg.fadeOut(300, function() {
+            $(this).remove();
+        });
+    }, 5000);
+    
+    // Click to dismiss
+    msg.click(function() {
+        $(this).fadeOut(300, function() {
+            $(this).remove();
+        });
     });
 }
 
@@ -440,7 +535,7 @@ function initContactFunctions() {
         });
         
         if (!isValid) {
-            alert('Please fill in all required fields.');
+            showMessage('Please fill in all required fields.', 'error');
             return;
         }
         
@@ -457,7 +552,7 @@ function initContactFunctions() {
         
         // Here you would normally send to server via AJAX
         // For now, just show success message
-        alert('Thank you for your message! We will get back to you soon.');
+        showMessage('Thank you for your message! We will get back to you soon.', 'success');
         $('#contactForm')[0].reset();
     });
 }
@@ -507,8 +602,23 @@ function initReservationFunctions() {
     });
 }
 
-// Make loadPage globally accessible
+// Make functions globally accessible
 window.loadPage = loadPage;
+window.updateNavbarForLoggedInUser = updateNavbarForLoggedInUser;
+window.updateNavbarForLoggedOutUser = updateNavbarForLoggedOutUser;
+window.showMessage = showMessage;
+
+// Add slideIn animation CSS if not present
+if (!$('style[data-main-animations]').length) {
+    $('head').append(`
+        <style data-main-animations>
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        </style>
+    `);
+}
 
 // Add error container styles if not already present
 if (!$('style[data-error-styles]').length) {
@@ -608,3 +718,5 @@ if (!$('style[data-error-styles]').length) {
         </style>
     `);
 }
+
+console.log("✅ Enhanced main.js loaded with FIXED login delegation!");

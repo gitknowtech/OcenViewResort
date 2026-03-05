@@ -30,70 +30,74 @@ public class CheckUserServlet extends HttpServlet {
         try {
             HttpSession session = request.getSession(false);
             
-            // Check session first
+            // Check if user is logged in via session
             if (session != null && Boolean.TRUE.equals(session.getAttribute("isLoggedIn"))) {
                 Integer userId = (Integer) session.getAttribute("userId");
                 String userEmail = (String) session.getAttribute("userEmail");
                 String firstName = (String) session.getAttribute("firstName");
+                String lastName = (String) session.getAttribute("lastName");
+                String phone = (String) session.getAttribute("phone");
                 
-                String displayName = firstName != null ? firstName : userEmail.split("@")[0];
+                String displayName = firstName != null && !firstName.trim().isEmpty() 
+                    ? firstName 
+                    : userEmail.split("@")[0];
                 
-                out.print("{\"loggedIn\":true,\"user\":{\"id\":" + userId + ",\"email\":\"" + userEmail + "\",\"name\":\"" + displayName + "\"}}");
+                String jsonResponse = "{\"loggedIn\":true,\"user\":{\"id\":" + userId + ",\"email\":\"" + userEmail + "\",\"name\":\"" + displayName + "\",\"firstName\":\"" + (firstName != null ? firstName : "") + "\",\"lastName\":\"" + (lastName != null ? lastName : "") + "\",\"phone\":\"" + (phone != null ? phone : "") + "\"},\"autoLogin\":false}";
+                out.print(jsonResponse);
                 return;
             }
             
             // Check remember me cookie
             Cookie[] cookies = request.getCookies();
-            String rememberToken = null;
-            
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if ("oceanview_remember".equals(cookie.getName())) {
-                        rememberToken = cookie.getValue();
-                        break;
-                    }
-                }
-            }
-            
-            if (rememberToken != null) {
-                // Validate remember token
-                String url = "jdbc:mysql://localhost:3306/oceanview?useSSL=false&serverTimezone=UTC";
-                String dbUser = "root";
-                String dbPassword = "";
-
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                
-                try (Connection conn = DriverManager.getConnection(url, dbUser, dbPassword)) {
-                    String query = "SELECT u.id, u.email, u.first_name, u.last_name FROM user_sessions s " +
-                                  "JOIN users u ON s.user_id = u.id " +
-                                  "WHERE s.session_id = ? AND s.expires_at > ? AND s.is_remember_me = TRUE";
-                    
-                    try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                        stmt.setString(1, rememberToken);
-                        stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+                        String sessionToken = cookie.getValue();
                         
-                        try (ResultSet rs = stmt.executeQuery()) {
-                            if (rs.next()) {
-                                // Auto login from remember me
-                                int userId = rs.getInt("id");
-                                String userEmail = rs.getString("email");
-                                String firstName = rs.getString("first_name");
-                                String lastName = rs.getString("last_name");
+                        // Check if token is valid and not expired
+                        String url = "jdbc:mysql://localhost:3306/oceanview?useSSL=false&serverTimezone=UTC";
+                        Class.forName("com.mysql.cj.jdbc.Driver");
+                        
+                        try (Connection conn = DriverManager.getConnection(url, "root", "")) {
+                            String query = "SELECT us.user_id, u.email, u.first_name, u.last_name, u.phone " +
+                                         "FROM user_sessions us " +
+                                         "JOIN users u ON us.user_id = u.id " +
+                                         "WHERE us.session_id = ? AND us.expires_at > ? AND us.is_remember_me = TRUE";
+                            
+                            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                                stmt.setString(1, sessionToken);
+                                stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
                                 
-                                // Create new session
-                                HttpSession newSession = request.getSession();
-                                newSession.setAttribute("userId", userId);
-                                newSession.setAttribute("userEmail", userEmail);
-                                newSession.setAttribute("firstName", firstName);
-                                newSession.setAttribute("lastName", lastName);
-                                newSession.setAttribute("isLoggedIn", true);
-                                
-                                String displayName = firstName != null ? firstName : userEmail.split("@")[0];
-                                
-                                out.print("{\"loggedIn\":true,\"autoLogin\":true,\"user\":{\"id\":" + userId + ",\"email\":\"" + userEmail + "\",\"name\":\"" + displayName + "\"}}");
-                                return;
+                                try (ResultSet rs = stmt.executeQuery()) {
+                                    if (rs.next()) {
+                                        // Auto login successful
+                                        int userId = rs.getInt("user_id");
+                                        String userEmail = rs.getString("email");
+                                        String firstName = rs.getString("first_name");
+                                        String lastName = rs.getString("last_name");
+                                        String phone = rs.getString("phone");
+                                        
+                                        // Create new session
+                                        HttpSession newSession = request.getSession();
+                                        newSession.setAttribute("userId", userId);
+                                        newSession.setAttribute("userEmail", userEmail);
+                                        newSession.setAttribute("firstName", firstName);
+                                        newSession.setAttribute("lastName", lastName);
+                                        newSession.setAttribute("phone", phone);
+                                        newSession.setAttribute("isLoggedIn", true);
+                                        
+                                        String displayName = firstName != null && !firstName.trim().isEmpty() 
+                                            ? firstName 
+                                            : userEmail.split("@")[0];
+                                        
+                                        String jsonResponse = "{\"loggedIn\":true,\"user\":{\"id\":" + userId + ",\"email\":\"" + userEmail + "\",\"name\":\"" + displayName + "\",\"firstName\":\"" + (firstName != null ? firstName : "") + "\",\"lastName\":\"" + (lastName != null ? lastName : "") + "\",\"phone\":\"" + (phone != null ? phone : "") + "\"},\"autoLogin\":true}";
+                                        out.print(jsonResponse);
+                                        return;
+                                    }
+                                }
                             }
                         }
+                        break;
                     }
                 }
             }

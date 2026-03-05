@@ -104,6 +104,43 @@
     to { transform: translateX(0); opacity: 1; }
 }
 
+/* Form error highlighting */
+.form-input.error {
+    border-color: #dc2626 !important;
+    background: #fef2f2 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+.form-error {
+    color: #dc2626;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    display: block;
+    min-height: 18px;
+}
+
+.form-error.show {
+    animation: errorSlideIn 0.3s ease-out;
+}
+
+@keyframes errorSlideIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Login method indicator */
+.login-method-hint {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 4px;
+    display: block;
+}
+
+.login-method-hint.show {
+    color: #10b981;
+    font-weight: 500;
+}
+
 /* Hide login form when logged in */
 .login-container.logged-in {
     display: none;
@@ -275,7 +312,7 @@
             <div class="user-name" id="statusUserName">User</div>
             <div class="user-email" id="statusUserEmail">user@example.com</div>
         </div>
-        <button class="logout-btn" onclick="logout()">
+        <button class="logout-btn" onclick="logoutFromLoginPage()">
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
     </div>
@@ -321,21 +358,23 @@
                     <p>Sign in to your account</p>
                 </div>
 
-                <form class="login-form" id="loginForm">
-                    <!-- Email Field -->
+                <form class="login-form" id="loginForm" novalidate>
+                    <!-- Username or Email Field -->
                     <div class="form-group">
-                        <label for="email">
-                            <i class="fas fa-envelope"></i> Email Address
+                        <label for="loginField">
+                            <i class="fas fa-user"></i> Username or Email
                         </label>
                         <input 
-                            type="email" 
-                            id="email" 
-                            name="email" 
+                            type="text" 
+                            id="loginField" 
+                            name="loginField" 
                             class="form-input" 
-                            placeholder="Enter your email"
+                            placeholder="Enter username or email"
+                            autocomplete="username"
                             required
                         >
-                        <span class="form-error" id="email-error"></span>
+                        <span class="form-error" id="loginField-error"></span>
+                        <span class="login-method-hint" id="loginMethodHint">You can use either username or email</span>
                     </div>
 
                     <!-- Password Field -->
@@ -350,9 +389,10 @@
                                 name="password" 
                                 class="form-input" 
                                 placeholder="Enter your password"
+                                autocomplete="current-password"
                                 required
                             >
-                            <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
@@ -375,7 +415,7 @@
 
                     <!-- Sign Up Link -->
                     <div class="signup-link">
-                        <p>Don't have an account? <a href="#" onclick="goToSignup()">Sign up here</a></p>
+                        <p>Don't have an account? <a href="#" onclick="goToSignupPage()">Sign up here</a></p>
                     </div>
 
                     <!-- Footer -->
@@ -396,6 +436,10 @@
             
             <div class="user-info-grid">
                 <div class="user-info-item">
+                    <div class="user-info-label">Username</div>
+                    <div class="user-info-value" id="welcomeUsername">username</div>
+                </div>
+                <div class="user-info-item">
                     <div class="user-info-label">Email Address</div>
                     <div class="user-info-value" id="welcomeUserEmail">user@example.com</div>
                 </div>
@@ -404,10 +448,6 @@
                     <div class="user-info-value">
                         <i class="fas fa-check-circle" style="color: #10b981;"></i> Active
                     </div>
-                </div>
-                <div class="user-info-item">
-                    <div class="user-info-label">Member Since</div>
-                    <div class="user-info-value" id="memberSince">2024</div>
                 </div>
                 <div class="user-info-item">
                     <div class="user-info-label">Last Login</div>
@@ -434,19 +474,19 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <a href="#" class="action-btn" onclick="goToBooking()">
+            <a href="#" class="action-btn" onclick="goToBookingPage()">
                 <i class="fas fa-calendar-plus"></i> New Booking
             </a>
-            <a href="#" class="action-btn" onclick="goToBookings()">
+            <a href="#" class="action-btn" onclick="goToBookingsPage()">
                 <i class="fas fa-list"></i> My Bookings
             </a>
-            <a href="#" class="action-btn" onclick="goToProfile()">
+            <a href="#" class="action-btn" onclick="goToProfilePage()">
                 <i class="fas fa-user-cog"></i> Profile Settings
             </a>
-            <a href="#" class="action-btn" onclick="goToSupport()">
+            <a href="#" class="action-btn" onclick="goToSupportPage()">
                 <i class="fas fa-headset"></i> Support
             </a>
-            <button class="action-btn logout-btn" onclick="logout()">
+            <button class="action-btn logout-btn" onclick="logoutFromLoginPage()">
                 <i class="fas fa-sign-out-alt"></i> Sign Out
             </button>
         </div>
@@ -454,23 +494,150 @@
 </div>
 
 <script>
-console.log('🚀 Enhanced login page loaded with full navbar integration');
+console.log('🚀 Login page loaded - USERNAME OR EMAIL VERSION');
 
-let currentUser = null;
+let currentLoginPageUser = null;
 
-// Message function
-function showMessage(text, type) {
-    const messageDiv = document.getElementById('msg');
-    messageDiv.textContent = text;
-    messageDiv.className = 'message ' + type + ' show';
+// Enhanced message function
+function showLoginMessage(text, type) {
+    console.log(`LOGIN PAGE ${type.toUpperCase()}: ${text}`);
     
-    setTimeout(() => messageDiv.classList.remove('show'), 5000);
+    // Remove existing messages first
+    const existingMessages = document.querySelectorAll('.message, .main-message');
+    existingMessages.forEach(msg => msg.remove());
+    
+    // Try to use main.js showMessage function first
+    if (typeof showMessage === 'function') {
+        showMessage(text, type);
+        return;
+    }
+    
+    // Fallback to local message display
+    const messageDiv = document.getElementById('msg');
+    if (messageDiv) {
+        messageDiv.textContent = text;
+        messageDiv.className = 'message ' + type + ' show';
+        setTimeout(() => messageDiv.classList.remove('show'), 5000);
+    }
+}
+
+// Detect login method and show hint
+function detectLoginMethod() {
+    const loginField = document.getElementById('loginField');
+    const hint = document.getElementById('loginMethodHint');
+    
+    if (!loginField || !hint) return;
+    
+    const value = loginField.value.trim();
+    
+    if (!value) {
+        hint.textContent = 'You can use either username or email';
+        hint.classList.remove('show');
+        return;
+    }
+    
+    if (value.includes('@')) {
+        hint.textContent = '📧 Email login detected';
+        hint.classList.add('show');
+    } else {
+        hint.textContent = '👤 Username login detected';
+        hint.classList.add('show');
+    }
+}
+
+// Enhanced form validation
+function validateLoginForm() {
+    console.log('🔍 Validating login form...');
+    
+    const loginFieldInput = document.getElementById('loginField');
+    const passwordInput = document.getElementById('password');
+    const loginFieldError = document.getElementById('loginField-error');
+    const passwordError = document.getElementById('password-error');
+    
+    if (!loginFieldInput || !passwordInput) {
+        console.error('❌ Form elements not found!');
+        showLoginMessage('Form elements not found. Please refresh the page.', 'error');
+        return false;
+    }
+    
+    const loginField = loginFieldInput.value.trim();
+    const password = passwordInput.value;
+    
+    console.log('📊 Form values:', { 
+        loginField: loginField, 
+        loginFieldLength: loginField.length,
+        password: password ? '[HIDDEN]' : 'EMPTY', 
+        passwordLength: password.length 
+    });
+    
+    // Clear previous errors and styling
+    loginFieldInput.classList.remove('error');
+    passwordInput.classList.remove('error');
+    if (loginFieldError) loginFieldError.textContent = '';
+    if (passwordError) passwordError.textContent = '';
+    
+    let isValid = true;
+    
+    // Login field validation (username or email)
+    if (!loginField) {
+        console.log('❌ Login field is empty');
+        if (loginFieldError) {
+            loginFieldError.textContent = 'Username or email is required';
+            loginFieldError.classList.add('show');
+        }
+        loginFieldInput.classList.add('error');
+        isValid = false;
+    } else if (loginField.length < 3) {
+        console.log('❌ Login field too short:', loginField.length);
+        if (loginFieldError) {
+            loginFieldError.textContent = 'Username or email must be at least 3 characters';
+            loginFieldError.classList.add('show');
+        }
+        loginFieldInput.classList.add('error');
+        isValid = false;
+    } else if (loginField.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginField)) {
+        console.log('❌ Email format invalid:', loginField);
+        if (loginFieldError) {
+            loginFieldError.textContent = 'Please enter a valid email address';
+            loginFieldError.classList.add('show');
+        }
+        loginFieldInput.classList.add('error');
+        isValid = false;
+    } else {
+        console.log('✅ Login field is valid:', loginField);
+    }
+    
+    // Password validation
+    if (!password) {
+        console.log('❌ Password is empty');
+        if (passwordError) {
+            passwordError.textContent = 'Password is required';
+            passwordError.classList.add('show');
+        }
+        passwordInput.classList.add('error');
+        isValid = false;
+    } else if (password.length < 3) {
+        console.log('❌ Password too short:', password.length);
+        if (passwordError) {
+            passwordError.textContent = 'Password must be at least 3 characters';
+            passwordError.classList.add('show');
+        }
+        passwordInput.classList.add('error');
+        isValid = false;
+    } else {
+        console.log('✅ Password is valid');
+    }
+    
+    console.log('📊 Validation result:', isValid);
+    return isValid;
 }
 
 // Password toggle
-function togglePassword() {
+function togglePasswordVisibility() {
     const passwordInput = document.getElementById('password');
     const toggleBtn = document.querySelector('.toggle-password i');
+    
+    if (!passwordInput || !toggleBtn) return;
     
     if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
@@ -482,248 +649,357 @@ function togglePassword() {
 }
 
 // Check user status on page load
-function checkUserStatus() {
-    console.log('🔍 Checking user login status...');
+function checkLoginPageUserStatus() {
+    console.log('🔍 LOGIN PAGE: Checking user login status...');
     
-    fetch('checkUser')
-        .then(response => response.json())
+    fetch('/OceanViewResort/checkUser')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            console.log('📊 User status:', data);
+            console.log('📊 LOGIN PAGE: User status:', data);
             
             if (data.loggedIn) {
-                currentUser = data.user;
+                currentLoginPageUser = data.user;
                 showLoggedInState(data.user, data.autoLogin);
             } else {
                 showLoginForm();
             }
         })
         .catch(error => {
-            console.error('❌ Error checking user status:', error);
+            console.error('❌ LOGIN PAGE: Error checking user status:', error);
             showLoginForm();
         });
 }
 
 // Show logged in state
 function showLoggedInState(user, autoLogin = false) {
-    console.log('✅ User is logged in:', user);
+    console.log('✅ LOGIN PAGE: User is logged in:', user);
     
-    // Hide login form, show logged in container
-    document.getElementById('loginContainer').style.display = 'none';
-    document.getElementById('loggedInContainer').classList.add('show');
+    const loginContainer = document.getElementById('loginContainer');
+    const loggedInContainer = document.getElementById('loggedInContainer');
+    
+    if (loginContainer) loginContainer.style.display = 'none';
+    if (loggedInContainer) loggedInContainer.classList.add('show');
     
     // Update user info in status bar
-    const displayName = user.name || user.email.split('@')[0];
+    const displayName = user.username || user.email.split('@')[0];
     const firstLetter = displayName.charAt(0).toUpperCase();
     
-    document.getElementById('statusUserAvatar').textContent = firstLetter;
-    document.getElementById('statusUserName').textContent = displayName;
-    document.getElementById('statusUserEmail').textContent = user.email;
+    const statusUserAvatar = document.getElementById('statusUserAvatar');
+    const statusUserName = document.getElementById('statusUserName');
+    const statusUserEmail = document.getElementById('statusUserEmail');
+    
+    if (statusUserAvatar) statusUserAvatar.textContent = firstLetter;
+    if (statusUserName) statusUserName.textContent = displayName;
+    if (statusUserEmail) statusUserEmail.textContent = user.email;
     
     // Update user info in welcome container
-    document.getElementById('welcomeUserName').textContent = displayName;
-    document.getElementById('welcomeUserEmail').textContent = user.email;
-    document.getElementById('memberSince').textContent = new Date().getFullYear();
-    document.getElementById('lastLoginTime').textContent = new Date().toLocaleString();
+    const welcomeUserName = document.getElementById('welcomeUserName');
+    const welcomeUsername = document.getElementById('welcomeUsername');
+    const welcomeUserEmail = document.getElementById('welcomeUserEmail');
+    const lastLoginTime = document.getElementById('lastLoginTime');
+    
+    if (welcomeUserName) welcomeUserName.textContent = displayName;
+    if (welcomeUsername) welcomeUsername.textContent = user.username;
+    if (welcomeUserEmail) welcomeUserEmail.textContent = user.email;
+    if (lastLoginTime) lastLoginTime.textContent = new Date().toLocaleString();
     
     // Show user status bar
-    document.getElementById('userStatusBar').classList.add('show');
+    const userStatusBar = document.getElementById('userStatusBar');
+    if (userStatusBar) userStatusBar.classList.add('show');
     
-    // Update navbar immediately
-    if (typeof updateNavbarAfterLogin === 'function') {
-        updateNavbarAfterLogin(user);
+    // Update main navbar using global function
+    if (typeof updateNavbarForLoggedInUser === 'function') {
+        updateNavbarForLoggedInUser(user);
     }
     
     if (autoLogin) {
-        showMessage('🎉 Welcome back, ' + displayName + '! Auto-logged in from saved session.', 'info');
+        showLoginMessage('🎉 Welcome back, ' + displayName + '! Auto-logged in from saved session.', 'info');
     }
     
-    // Load user stats (mock data for now)
+    // Load user stats
     loadUserStats();
 }
 
 // Show login form
 function showLoginForm() {
-    console.log('📝 Showing login form');
+    console.log('📝 LOGIN PAGE: Showing login form');
     
-    document.getElementById('loginContainer').style.display = 'flex';
-    document.getElementById('loggedInContainer').classList.remove('show');
-    document.getElementById('userStatusBar').classList.remove('show');
+    const loginContainer = document.getElementById('loginContainer');
+    const loggedInContainer = document.getElementById('loggedInContainer');
+    const userStatusBar = document.getElementById('userStatusBar');
     
-    // Update navbar to show login button
-    if (typeof updateNavbarAfterLogout === 'function') {
-        updateNavbarAfterLogout();
+    if (loginContainer) loginContainer.style.display = 'flex';
+    if (loggedInContainer) loggedInContainer.classList.remove('show');
+    if (userStatusBar) userStatusBar.classList.remove('show');
+    
+    // Update main navbar using global function
+    if (typeof updateNavbarForLoggedOutUser === 'function') {
+        updateNavbarForLoggedOutUser();
     }
     
-    currentUser = null;
+    currentLoginPageUser = null;
 }
 
-// Load user stats (mock function - replace with real API call)
+// Load user stats
 function loadUserStats() {
-    // Mock stats - replace with real API calls
-    document.getElementById('totalBookings').textContent = Math.floor(Math.random() * 10) + 1;
-    document.getElementById('activeBookings').textContent = Math.floor(Math.random() * 3);
-    document.getElementById('loyaltyPoints').textContent = Math.floor(Math.random() * 1000) + 100;
+    const totalBookings = document.getElementById('totalBookings');
+    const activeBookings = document.getElementById('activeBookings');
+    const loyaltyPoints = document.getElementById('loyaltyPoints');
+    
+    if (totalBookings) totalBookings.textContent = Math.floor(Math.random() * 10) + 1;
+    if (activeBookings) activeBookings.textContent = Math.floor(Math.random() * 3);
+    if (loyaltyPoints) loyaltyPoints.textContent = Math.floor(Math.random() * 1000) + 100;
 }
 
-// Login form submission
-document.addEventListener('DOMContentLoaded', function() {
-    // Check user status on load
-    checkUserStatus();
+// UPDATED: Login form submission with username or email
+function handleLoginFormSubmission(e) {
+    e.preventDefault();
+    e.stopPropagation();
     
-    // Login form handler
-    const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const remember = document.getElementById('remember').checked;
-        const loginBtn = document.getElementById('loginBtn');
-        
-        // Clear errors
-        document.getElementById('email-error').textContent = '';
-        document.getElementById('password-error').textContent = '';
-        
-        let isValid = true;
-        
-        if (!email) {
-            document.getElementById('email-error').textContent = 'Email is required';
-            isValid = false;
-        } else if (!/\S+@\S+\.\S+/.test(email)) {
-            document.getElementById('email-error').textContent = 'Please enter a valid email';
-            isValid = false;
-        }
-        
-        if (!password) {
-            document.getElementById('password-error').textContent = 'Password is required';
-            isValid = false;
-        }
-        
-        if (!isValid) return;
-        
-        // Show loading
+    console.log('🔐 LOGIN PAGE: Form submitted');
+    
+    // Validate form first
+    if (!validateLoginForm()) {
+        console.log('❌ Form validation failed');
+        showLoginMessage('Please fix the errors above and try again.', 'error');
+        return false;
+    }
+    
+    const loginField = document.getElementById('loginField').value.trim();
+    const password = document.getElementById('password').value;
+    const remember = document.getElementById('remember').checked;
+    const loginBtn = document.getElementById('loginBtn');
+    
+    console.log('📊 LOGIN PAGE: Sending login request for:', loginField);
+    console.log('📊 LOGIN PAGE: Remember me:', remember);
+    
+    // Show loading state
+    if (loginBtn) {
         loginBtn.disabled = true;
         loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+    }
+    
+    // Prepare form data with loginField (can be username or email)
+    const formData = new URLSearchParams();
+    formData.append('loginField', loginField);
+    formData.append('password', password);
+    if (remember) formData.append('remember', 'true');
+    
+    console.log('📊 LOGIN PAGE: Form data string:', formData.toString());
+    
+    // Send request with proper headers
+    fetch('/OceanViewResort/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        body: formData.toString()
+    })
+    .then(response => {
+        console.log('📊 LOGIN PAGE: Response status:', response.status);
         
-        // Send login request
-        const formData = new FormData();
-        formData.append('email', email);
-        formData.append('password', password);
-        if (remember) formData.append('remember', 'true');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('📊 LOGIN PAGE: Login response:', data);
         
-        fetch('login', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
+        // Reset button
+        if (loginBtn) {
             loginBtn.disabled = false;
             loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+        }
+        
+        if (data.success) {
+            console.log('✅ LOGIN SUCCESS!');
+            showLoginMessage('✅ ' + data.message, 'success');
             
-            if (data.success) {
-                showMessage('✅ ' + data.message, 'success');
-                
-                // Clear form
-                document.getElementById('email').value = '';
-                document.getElementById('password').value = '';
-                document.getElementById('remember').checked = false;
-                
-                // Update navbar immediately
-                if (typeof updateNavbarAfterLogin === 'function') {
-                    updateNavbarAfterLogin(data.user);
-                }
-                
-                // Show logged in state
-                setTimeout(() => {
-                    showLoggedInState(data.user);
-                }, 1000);
-                
-            } else {
-                showMessage('❌ ' + data.message, 'error');
+            // Clear form
+            document.getElementById('loginField').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('remember').checked = false;
+            
+            // Update main navbar immediately
+            if (typeof updateNavbarForLoggedInUser === 'function') {
+                updateNavbarForLoggedInUser(data.user);
             }
-        })
-        .catch(error => {
+            
+            // Show logged in state after delay
+            setTimeout(() => {
+                showLoggedInState(data.user);
+            }, 1500);
+            
+        } else {
+            console.log('❌ LOGIN FAILED:', data.message);
+            showLoginMessage('❌ ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('❌ LOGIN PAGE: Login error:', error);
+        
+        // Reset button
+        if (loginBtn) {
             loginBtn.disabled = false;
             loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
-            console.error('❌ Login error:', error);
-            showMessage('⚠️ Network error. Please try again.', 'error');
-        });
+        }
+        
+        showLoginMessage('⚠️ Network error. Please check your connection and try again.', 'error');
     });
-});
+    
+    return false;
+}
 
 // Logout function
-function logout() {
+function logoutFromLoginPage() {
     if (!confirm('Are you sure you want to logout?')) return;
     
-    console.log('👋 Logging out user...');
+    console.log('👋 LOGIN PAGE: Logging out user...');
     
-    fetch('logout', {
+    fetch('/OceanViewResort/logout', {
         method: 'POST'
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showMessage('👋 ' + data.message, 'info');
+            showLoginMessage('👋 ' + data.message, 'info');
             
-            // Update navbar immediately
-            if (typeof updateNavbarAfterLogout === 'function') {
-                updateNavbarAfterLogout();
+            // Update main navbar
+            if (typeof updateNavbarForLoggedOutUser === 'function') {
+                updateNavbarForLoggedOutUser();
             }
             
             showLoginForm();
         } else {
-            showMessage('❌ Error during logout', 'error');
+            showLoginMessage('❌ Error during logout', 'error');
         }
     })
     .catch(error => {
-        console.error('❌ Logout error:', error);
-        showMessage('⚠️ Network error during logout', 'error');
+        console.error('❌ LOGIN PAGE: Logout error:', error);
+        showLoginMessage('⚠️ Network error during logout', 'error');
     });
 }
 
 // Navigation functions
-function goToSignup() {
+function goToSignupPage() {
+    console.log('🔗 LOGIN PAGE: Going to signup');
     if (typeof loadPage === 'function') {
         loadPage('login/signup');
+    } else {
+        console.warn('⚠️ loadPage function not available');
     }
 }
 
-function goToBooking() {
+function goToBookingPage() {
+    console.log('🔗 LOGIN PAGE: Going to booking');
     if (typeof loadPage === 'function') {
         loadPage('reservation');
     }
 }
 
-function goToProfile() {
-    if (typeof loadPage === 'function') {
-        loadPage('profile');
-    }
-}
-
-function goToBookings() {
+function goToBookingsPage() {
+    console.log('🔗 LOGIN PAGE: Going to bookings');
     if (typeof loadPage === 'function') {
         loadPage('bookings');
     }
 }
 
-function goToSupport() {
+function goToProfilePage() {
+    console.log('🔗 LOGIN PAGE: Going to profile');
+    if (typeof loadPage === 'function') {
+        loadPage('profile');
+    }
+}
+
+function goToSupportPage() {
+    console.log('🔗 LOGIN PAGE: Going to support');
     if (typeof loadPage === 'function') {
         loadPage('support');
     }
 }
 
-// Global functions for navbar communication
-window.updateNavbarAfterLogin = function(user) {
-    console.log('🔄 Updating navbar after login:', user);
-    if (typeof updateNavbarAfterLogin === 'function') {
-        updateNavbarAfterLogin(user);
+// Real-time validation and login method detection
+function setupRealTimeValidation() {
+    const loginFieldInput = document.getElementById('loginField');
+    const passwordInput = document.getElementById('password');
+    
+    if (loginFieldInput) {
+        // Detect login method on input
+        loginFieldInput.addEventListener('input', function() {
+            this.classList.remove('error');
+            const loginFieldError = document.getElementById('loginField-error');
+            if (loginFieldError) loginFieldError.textContent = '';
+            
+            // Detect login method
+            detectLoginMethod();
+        });
+        
+        loginFieldInput.addEventListener('blur', function() {
+            const loginField = this.value.trim();
+            const loginFieldError = document.getElementById('loginField-error');
+            
+            this.classList.remove('error');
+            if (loginFieldError) loginFieldError.textContent = '';
+            
+            if (loginField && loginField.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginField)) {
+                this.classList.add('error');
+                if (loginFieldError) {
+                    loginFieldError.textContent = 'Please enter a valid email address';
+                    loginFieldError.classList.add('show');
+                }
+            }
+        });
     }
-};
+    
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            this.classList.remove('error');
+            const passwordError = document.getElementById('password-error');
+            if (passwordError) passwordError.textContent = '';
+        });
+    }
+}
 
-window.updateNavbarAfterLogout = function() {
-    console.log('🔄 Updating navbar after logout');
-    if (typeof updateNavbarAfterLogout === 'function') {
-        updateNavbarAfterLogout();
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 LOGIN PAGE: DOM loaded, initializing...');
+    
+    setTimeout(checkLoginPageUserStatus, 100);
+    
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLoginFormSubmission);
+        console.log('✅ LOGIN PAGE: Form event listener attached');
+    } else {
+        console.error('❌ LOGIN PAGE: Form not found!');
     }
-};
+    
+    setupRealTimeValidation();
+});
+
+// Also check when this script runs (for AJAX loaded pages)
+setTimeout(function() {
+    if (document.getElementById('loginForm')) {
+        console.log('🔄 LOGIN PAGE: Setting up via timeout...');
+        
+        checkLoginPageUserStatus();
+        
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm && !loginForm.hasAttribute('data-handler-attached')) {
+            loginForm.addEventListener('submit', handleLoginFormSubmission);
+            loginForm.setAttribute('data-handler-attached', 'true');
+            console.log('✅ LOGIN PAGE: Form handler attached via timeout');
+        }
+        
+        setupRealTimeValidation();
+    }
+}, 200);
+
+console.log('✅ LOGIN PAGE: All functions loaded and ready - USERNAME OR EMAIL VERSION');
 </script>

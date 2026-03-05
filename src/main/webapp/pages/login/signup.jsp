@@ -45,7 +45,6 @@
 <!-- Message Container -->
 <div id="msg" class="message"></div>
 
-<!-- Same HTML structure as before -->
 <div class="signup-page-content">
     <div class="signup-container">
         <!-- Left Column - Branding -->
@@ -62,7 +61,7 @@
                 <div class="branding-features">
                     <div class="feature">
                         <i class="fas fa-user-plus"></i>
-                        <span>Easy Registration</span>
+                        <span>Quick Registration</span>
                     </div>
                     <div class="feature">
                         <i class="fas fa-shield-alt"></i>
@@ -76,7 +75,7 @@
             </div>
         </div>
 
-        <!-- Right Column - Signup Form -->
+        <!-- Right Column - Simple Signup Form -->
         <div class="signup-form-container">
             <div class="signup-form-wrapper">
                 <div class="form-header">
@@ -84,8 +83,25 @@
                     <p>Join Ocean View Beach Resort</p>
                 </div>
 
-                <!-- WORKING FORM WITH CORRECT CSS CLASSES -->
+                <!-- SIMPLE FORM - 5 FIELDS ONLY -->
                 <form class="signup-form" id="f" method="post" action="signup">
+                    
+                    <!-- Username Field -->
+                    <div class="form-group">
+                        <label for="u">
+                            <i class="fas fa-user"></i> Username
+                        </label>
+                        <input 
+                            type="text" 
+                            id="u" 
+                            name="username"
+                            class="form-input" 
+                            placeholder="Choose a unique username"
+                            required
+                        >
+                        <span class="form-error" id="ue"></span>
+                    </div>
+
                     <!-- Email Field -->
                     <div class="form-group">
                         <label for="e">
@@ -96,10 +112,26 @@
                             id="e" 
                             name="email"
                             class="form-input" 
-                            placeholder="Enter your email"
+                            placeholder="Enter your email address"
                             required
                         >
                         <span class="form-error" id="ee"></span>
+                    </div>
+
+                    <!-- Mobile Number Field -->
+                    <div class="form-group">
+                        <label for="m">
+                            <i class="fas fa-mobile-alt"></i> Mobile Number
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="m" 
+                            name="mobile"
+                            class="form-input" 
+                            placeholder="+94771234567"
+                            required
+                        >
+                        <span class="form-error" id="me"></span>
                     </div>
 
                     <!-- Password Field -->
@@ -113,7 +145,7 @@
                                 id="p" 
                                 name="password"
                                 class="form-input" 
-                                placeholder="Create a password"
+                                placeholder="Create a strong password"
                                 required
                             >
                             <button type="button" class="toggle-password" onclick="togglePassword('p')">
@@ -173,15 +205,14 @@
 </div>
 
 <script>
-console.log('✅ Signup script loaded with auto redirect');
+console.log('✅ Simple Signup script loaded');
 
-// Enhanced message function with countdown
+// Enhanced message function
 function msg(text, type, callback) {
     const m = document.getElementById('msg');
     m.textContent = text;
     m.className = 'message ' + type + ' show';
     
-    // Auto hide after 5 seconds (or call callback)
     setTimeout(() => {
         m.classList.remove('show');
         if (callback) callback();
@@ -203,7 +234,6 @@ function showSuccessWithRedirect(message) {
             setTimeout(updateMessage, 1000);
         } else {
             m.classList.remove('show');
-            // Redirect to login
             goLogin();
         }
     }
@@ -213,18 +243,19 @@ function showSuccessWithRedirect(message) {
 
 // Clear form function
 function clear() {
-    document.getElementById('e').value = '';
-    document.getElementById('p').value = '';
-    document.getElementById('cp').value = '';
-    document.getElementById('t').checked = false;
-    document.getElementById('ee').textContent = '';
-    document.getElementById('pe').textContent = '';
-    document.getElementById('cpe').textContent = '';
+    const fields = ['u', 'e', 'm', 'p', 'cp'];
+    const errors = ['ue', 'ee', 'me', 'pe', 'cpe'];
     
-    // Remove error styling
-    document.getElementById('e').classList.remove('error');
-    document.getElementById('p').classList.remove('error');
-    document.getElementById('cp').classList.remove('error');
+    fields.forEach(field => {
+        document.getElementById(field).value = '';
+        document.getElementById(field).classList.remove('error');
+    });
+    
+    errors.forEach(error => {
+        document.getElementById(error).textContent = '';
+    });
+    
+    document.getElementById('t').checked = false;
 }
 
 // Password toggle function
@@ -248,34 +279,47 @@ function goLogin() {
         loadPage('login/login');
     } else {
         console.log('Redirecting to login page...');
-        // Alternative redirect if loadPage function is not available
-        window.location.href = 'login.jsp'; // Change this to your login page URL
+        window.location.href = 'login.jsp';
     }
 }
 
-// Form submission handler - UPDATED WITH AUTO REDIRECT
+// Form submission handler - SIMPLE VERSION
 document.getElementById('f').onsubmit = function(e) {
     e.preventDefault();
     
+    // Get field values
+    const username = document.getElementById('u').value.trim();
     const email = document.getElementById('e').value.trim();
-    const pass = document.getElementById('p').value;
-    const cpass = document.getElementById('cp').value;
+    const mobile = document.getElementById('m').value.trim();
+    const password = document.getElementById('p').value;
+    const confirmPassword = document.getElementById('cp').value;
     const terms = document.getElementById('t').checked;
     const btn = document.getElementById('btn');
     
-    // Clear errors
-    document.getElementById('ee').textContent = '';
-    document.getElementById('pe').textContent = '';
-    document.getElementById('cpe').textContent = '';
+    // Clear all errors
+    const errors = ['ue', 'ee', 'me', 'pe', 'cpe'];
+    const fields = ['u', 'e', 'm', 'p', 'cp'];
     
-    // Remove error styling
-    document.getElementById('e').classList.remove('error');
-    document.getElementById('p').classList.remove('error');
-    document.getElementById('cp').classList.remove('error');
+    errors.forEach(error => document.getElementById(error).textContent = '');
+    fields.forEach(field => document.getElementById(field).classList.remove('error'));
     
     let ok = true;
     
-    // Validation with error styling
+    // Validation
+    if (!username) { 
+        document.getElementById('ue').textContent = 'Username is required'; 
+        document.getElementById('u').classList.add('error');
+        ok = false; 
+    } else if (username.length < 3) {
+        document.getElementById('ue').textContent = 'Username must be at least 3 characters';
+        document.getElementById('u').classList.add('error');
+        ok = false;
+    } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        document.getElementById('ue').textContent = 'Username can only contain letters, numbers, and underscores';
+        document.getElementById('u').classList.add('error');
+        ok = false;
+    }
+    
     if (!email) { 
         document.getElementById('ee').textContent = 'Email is required'; 
         document.getElementById('e').classList.add('error');
@@ -286,21 +330,31 @@ document.getElementById('f').onsubmit = function(e) {
         ok = false;
     }
     
-    if (!pass) { 
+    if (!mobile) { 
+        document.getElementById('me').textContent = 'Mobile number is required'; 
+        document.getElementById('m').classList.add('error');
+        ok = false; 
+    } else if (!/^\+94\d{9}$/.test(mobile)) {
+        document.getElementById('me').textContent = 'Please enter a valid Sri Lankan mobile number (+94xxxxxxxxx)';
+        document.getElementById('m').classList.add('error');
+        ok = false;
+    }
+    
+    if (!password) { 
         document.getElementById('pe').textContent = 'Password is required'; 
         document.getElementById('p').classList.add('error');
         ok = false; 
-    } else if (pass.length < 8) { 
-        document.getElementById('pe').textContent = 'Password must be 8+ characters'; 
+    } else if (password.length < 8) { 
+        document.getElementById('pe').textContent = 'Password must be at least 8 characters'; 
         document.getElementById('p').classList.add('error');
         ok = false; 
     }
     
-    if (!cpass) { 
+    if (!confirmPassword) { 
         document.getElementById('cpe').textContent = 'Confirm password is required'; 
         document.getElementById('cp').classList.add('error');
         ok = false; 
-    } else if (pass !== cpass) { 
+    } else if (password !== confirmPassword) { 
         document.getElementById('cpe').textContent = 'Passwords do not match'; 
         document.getElementById('cp').classList.add('error');
         ok = false; 
@@ -318,9 +372,11 @@ document.getElementById('f').onsubmit = function(e) {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
     
     // Send data
-    const data = 'email=' + encodeURIComponent(email) + 
-                 '&password=' + encodeURIComponent(pass) + 
-                 '&confirmPassword=' + encodeURIComponent(cpass);
+    const data = 'username=' + encodeURIComponent(username) + 
+                 '&email=' + encodeURIComponent(email) + 
+                 '&mobile=' + encodeURIComponent(mobile) +
+                 '&password=' + encodeURIComponent(password) + 
+                 '&confirmPassword=' + encodeURIComponent(confirmPassword);
     
     fetch('signup', {
         method: 'POST',
@@ -334,15 +390,10 @@ document.getElementById('f').onsubmit = function(e) {
         btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
         
         if (d.success) {
-            // SUCCESS - Show message with auto redirect
             console.log('✅ Account created successfully');
             clear();
-            
-            // Show success message with countdown and auto redirect
-            showSuccessWithRedirect(d.message + ' Welcome to Ocean View! Please login.');
-            
+            showSuccessWithRedirect(d.message + ' Welcome to Ocean View!');
         } else {
-            // ERROR
             msg('❌ ' + d.message, 'error');
         }
     })
