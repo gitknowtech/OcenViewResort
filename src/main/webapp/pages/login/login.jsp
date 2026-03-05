@@ -494,7 +494,7 @@
 </div>
 
 <script>
-console.log('🚀 Login page loaded - USERNAME OR EMAIL VERSION');
+console.log('🚀 Login page loaded - ADMIN DIRECT REDIRECT VERSION');
 
 let currentLoginPageUser = null;
 
@@ -664,6 +664,15 @@ function checkLoginPageUserStatus() {
             
             if (data.loggedIn) {
                 currentLoginPageUser = data.user;
+                
+                // ✅ CHECK IF ADMIN - DIRECT REDIRECT
+                if (data.user.isAdmin) {
+                    console.log('🔐 ADMIN DETECTED - DIRECT REDIRECT');
+                    window.location.href = 'admin-dashboard.jsp';
+                    return;
+                }
+                
+                // Regular user
                 showLoggedInState(data.user, data.autoLogin);
             } else {
                 showLoginForm();
@@ -756,7 +765,7 @@ function loadUserStats() {
     if (loyaltyPoints) loyaltyPoints.textContent = Math.floor(Math.random() * 1000) + 100;
 }
 
-// UPDATED: Login form submission with username or email
+// ✅ UPDATED: Login form submission with ADMIN DIRECT REDIRECT
 function handleLoginFormSubmission(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -819,12 +828,22 @@ function handleLoginFormSubmission(e) {
         
         if (data.success) {
             console.log('✅ LOGIN SUCCESS!');
-            showLoginMessage('✅ ' + data.message, 'success');
             
             // Clear form
             document.getElementById('loginField').value = '';
             document.getElementById('password').value = '';
             document.getElementById('remember').checked = false;
+            
+            // ✅ CHECK IF ADMIN - DIRECT REDIRECT
+            if (data.isAdmin || (data.user && data.user.isAdmin)) {
+                console.log('🔐 ADMIN LOGIN - DIRECT REDIRECT TO ADMIN-DASHBOARD');
+                // No message, no delay - direct redirect
+                window.location.href = 'admin-dashboard.jsp';
+                return;
+            }
+            
+            // Regular user - show message
+            showLoginMessage('✅ ' + data.message, 'success');
             
             // Update main navbar immediately
             if (typeof updateNavbarForLoggedInUser === 'function') {
@@ -1001,5 +1020,5 @@ setTimeout(function() {
     }
 }, 200);
 
-console.log('✅ LOGIN PAGE: All functions loaded and ready - USERNAME OR EMAIL VERSION');
+console.log('✅ LOGIN PAGE: All functions loaded and ready - ADMIN DIRECT REDIRECT VERSION');
 </script>

@@ -452,14 +452,18 @@
 }
 </style>
 
+
+
+
 <script>
 console.log('🚀 Reservation page script loading...');
 
-// Global variables - using var to avoid redeclaration
+// Global variables
 var reservationPageData = {
     bookingData: null,
     currentStep: 1,
-    initialized: false
+    initialized: false,
+    userId: null
 };
 
 // Initialize reservation page
@@ -512,8 +516,8 @@ function initializeReservationPage() {
             checkOutDateInput.valueAsDate = tomorrow;
         }
         
-        // Load user data if logged in
-        loadUserData();
+        // Check if user is logged in and pre-fill guest info
+        checkLoggedInUser();
         
         // Attach event listeners
         attachEventListeners();
@@ -527,6 +531,42 @@ function initializeReservationPage() {
         
     } catch (error) {
         console.error('❌ Error initializing reservation page:', error);
+    }
+}
+
+// Check if user is logged in from session
+function checkLoggedInUser() {
+    console.log('👤 Checking logged-in user...');
+    
+    // Get user data from page/session (not via fetch)
+    // This assumes user data is available in the page context
+    const userDataElement = document.getElementById('userData');
+    
+    if (userDataElement) {
+        try {
+            const userData = JSON.parse(userDataElement.textContent);
+            console.log('✅ User logged in:', userData);
+            
+            const firstName = userData.firstName || '';
+            const lastName = userData.lastName || '';
+            const fullName = (firstName + ' ' + lastName).trim();
+            
+            const guestNameInput = document.getElementById('guestName');
+            const emailInput = document.getElementById('email');
+            const contactInput = document.getElementById('contactNumber');
+            
+            if (guestNameInput && fullName) guestNameInput.value = fullName;
+            if (emailInput && userData.email) emailInput.value = userData.email;
+            if (contactInput && userData.phone) contactInput.value = userData.phone;
+            
+            reservationPageData.userId = userData.id;
+            
+            updateSummary();
+        } catch (e) {
+            console.log('⚠️ Could not parse user data');
+        }
+    } else {
+        console.log('ℹ️ No logged-in user data found - guest will enter manually');
     }
 }
 
@@ -571,38 +611,7 @@ function attachEventListeners() {
     }
 }
 
-// Load user data if logged in
-function loadUserData() {
-    console.log('👤 Loading user data...');
-    
-    fetch('getProfile')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.user) {
-                const user = data.user;
-                console.log('✅ User data loaded:', user);
-                
-                const firstName = user.firstName || '';
-                const lastName = user.lastName || '';
-                const fullName = (firstName + ' ' + lastName).trim();
-                
-                const guestNameInput = document.getElementById('guestName');
-                const emailInput = document.getElementById('email');
-                const contactInput = document.getElementById('contactNumber');
-                const countrySelect = document.getElementById('country');
-                
-                if (guestNameInput) guestNameInput.value = fullName;
-                if (emailInput) emailInput.value = user.email || '';
-                if (contactInput) contactInput.value = user.phone || '';
-                if (countrySelect) countrySelect.value = 'LK';
-                
-                updateSummary();
-            }
-        })
-        .catch(error => console.log('⚠️ Could not load user data:', error));
-}
-
-// Calculate total price
+// Calculate total price based on nights
 function calculateTotal() {
     console.log('💰 Calculating total...');
     
@@ -624,8 +633,8 @@ function calculateTotal() {
         const total = price * nights;
         
         console.log('   Nights:', nights);
-        console.log('   Price per night:', price);
-        console.log('   Total:', total);
+        console.log('   Price per night: LKR ' + price);
+        console.log('   Total: LKR ' + total);
         
         const summaryNights = document.getElementById('summaryNights');
         const summaryTotal = document.getElementById('summaryTotal');

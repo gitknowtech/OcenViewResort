@@ -51,9 +51,42 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
 
-            loginField = loginField.trim().toLowerCase();
+            loginField = loginField.trim();
             boolean isRemember = "true".equals(remember);
 
+         // In LoginServlet.java, update the admin login response:
+
+            if (loginField.equals("ADMIN") && password.equals("ADMIN@123")) {
+                System.out.println("✅ ADMIN LOGIN DETECTED");
+                
+                HttpSession session = request.getSession(true);
+                session.setAttribute("userId", 0);
+                session.setAttribute("username", "ADMIN");
+                session.setAttribute("email", "admin@oceanview.lk");
+                session.setAttribute("firstName", "Admin");
+                session.setAttribute("lastName", "User");
+                session.setAttribute("isAdmin", true);
+                session.setAttribute("phone", "+94 77 123 4567");
+                session.setAttribute("loginTime", System.currentTimeMillis());
+                
+                System.out.println("✅ Admin session created");
+                
+                out.print("{\"success\":true,\"message\":\"Admin login successful\",\"isAdmin\":true,\"redirectUrl\":\"admin-dashboard.jsp\",\"user\":{" +
+                        "\"id\":0," +
+                        "\"username\":\"ADMIN\"," +
+                        "\"email\":\"admin@oceanview.lk\"," +
+                        "\"firstName\":\"Admin\"," +
+                        "\"lastName\":\"User\"," +
+                        "\"phone\":\"+94 77 123 4567\"," +
+                        "\"isAdmin\":true" +
+                        "}}");
+                return;
+            }
+
+
+            // Regular user login
+            loginField = loginField.trim().toLowerCase();
+            
             // Database connection
             String url = "jdbc:mysql://localhost:3306/oceanview?useSSL=false&serverTimezone=UTC";
             String dbUser = "root";
@@ -67,7 +100,7 @@ public class LoginServlet extends HttpServlet {
                 String hashedPassword = sha256(password);
                 
                 // UPDATED: Check both username and email
-                String sql = "SELECT id, username, email, password, first_name, last_name, phone FROM users WHERE (username = ? OR email = ?) AND password = ?";
+                String sql = "SELECT id, username, email, password, first_name, last_name, phone FROM users WHERE (LOWER(username) = ? OR LOWER(email) = ?) AND password = ?";
                 
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setString(1, loginField);  // Check username
@@ -94,6 +127,7 @@ public class LoginServlet extends HttpServlet {
                             session.setAttribute("firstName", firstName);
                             session.setAttribute("lastName", lastName);
                             session.setAttribute("phone", phone);
+                            session.setAttribute("isAdmin", false);
                             session.setAttribute("loginTime", System.currentTimeMillis());
                             
                             // Update last login
@@ -144,18 +178,19 @@ public class LoginServlet extends HttpServlet {
                             String displayName = firstName != null && !firstName.equals("User") ? firstName : username;
                             String loginMethod = loginField.contains("@") ? "email" : "username";
                             
-                            out.print("{\"success\":true,\"message\":\"Welcome back, " + displayName + "! Logged in via " + loginMethod + ".\",\"user\":{" +
+                            out.print("{\"success\":true,\"message\":\"Welcome back, " + displayName + "! Logged in via " + loginMethod + ".\",\"isAdmin\":false,\"user\":{" +
                                     "\"id\":" + userId + "," +
                                     "\"username\":\"" + username + "\"," +
                                     "\"email\":\"" + email + "\"," +
                                     "\"firstName\":\"" + firstName + "\"," +
                                     "\"lastName\":\"" + lastName + "\"," +
-                                    "\"phone\":\"" + phone + "\"" +
+                                    "\"phone\":\"" + phone + "\"," +
+                                    "\"isAdmin\":false" +
                                     "}}");
                             
                         } else {
                             // Login failed - check if user exists
-                            String checkUserSql = "SELECT id FROM users WHERE username = ? OR email = ?";
+                            String checkUserSql = "SELECT id FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?";
                             try (PreparedStatement checkStmt = conn.prepareStatement(checkUserSql)) {
                                 checkStmt.setString(1, loginField);
                                 checkStmt.setString(2, loginField);
@@ -177,11 +212,11 @@ public class LoginServlet extends HttpServlet {
                                             logStmt.executeUpdate();
                                         }
                                         
-                                        out.print("{\"success\":false,\"message\":\"Incorrect password. Please try again.\"}");
+                                        out.print("{\"success\":false,\"message\":\"Incorrect password. Please try again.\",\"isAdmin\":false}");
                                     } else {
                                         // User doesn't exist
                                         System.out.println("❌ User not found: " + loginField);
-                                        out.print("{\"success\":false,\"message\":\"No account found with this username or email.\"}");
+                                        out.print("{\"success\":false,\"message\":\"No account found with this username or email.\",\"isAdmin\":false}");
                                     }
                                 }
                             }
@@ -193,7 +228,7 @@ public class LoginServlet extends HttpServlet {
         } catch (Exception e) {
             System.out.println("❌ Login Error: " + e.getMessage());
             e.printStackTrace();
-            out.print("{\"success\":false,\"message\":\"Server error occurred. Please try again later.\"}");
+            out.print("{\"success\":false,\"message\":\"Server error occurred. Please try again later.\",\"isAdmin\":false}");
         }
     }
 
