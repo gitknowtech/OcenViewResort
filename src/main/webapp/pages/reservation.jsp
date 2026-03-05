@@ -3,7 +3,7 @@
 <!-- Reservation Section -->
 <section class="section active">
     <div class="container">
-        <h2 class="section-title">MAKE A RESERVATION</h2>
+        <h2 class="section-title">🏨 MAKE A RESERVATION</h2>
         <div class="reservation-container">
             <div class="reservation-form">
                 <h3>Book Your Stay</h3>
@@ -43,32 +43,22 @@
                     <div class="form-step" id="step2" style="display: none;">
                         <h4>Booking Details</h4>
                         
-                        <!-- Room Type (Pre-filled from accommodation page) -->
-                        <div class="form-row">
+                        <!-- ROOM SELECTION PANELS -->
+                        <div class="form-row full-width">
                             <div class="form-group">
-                                <label>Room Type *</label>
-                                <div class="room-display">
-                                    <div id="roomTypeDisplay" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff;">
-                                        <strong id="displayRoomName">Loading...</strong>
-                                        <p id="displayRoomDesc" style="margin: 8px 0 0 0; color: #666; font-size: 14px;"></p>
-                                        <p id="displayRoomPrice" style="margin: 8px 0 0 0; color: #007bff; font-weight: bold; font-size: 16px;"></p>
+                                <label>Select Room *</label>
+                                <div id="roomsContainer" class="rooms-grid">
+                                    <div style="text-align: center; padding: 20px; color: #999; grid-column: 1/-1;">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading rooms...
                                     </div>
-                                    <input type="hidden" id="roomType" name="roomType">
-                                    <input type="hidden" id="roomPrice" name="roomPrice">
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Number of Guests</label>
-                                <select id="guests" name="guests" onchange="calculateTotal()">
-                                    <option value="1">1 Guest</option>
-                                    <option value="2" selected>2 Guests</option>
-                                    <option value="3">3 Guests</option>
-                                    <option value="4">4 Guests</option>
-                                </select>
+                                <input type="hidden" id="roomId" name="roomId" required>
+                                <input type="hidden" id="roomPrice" name="roomPrice">
+                                <input type="hidden" id="roomType" name="roomType">
                             </div>
                         </div>
 
-                        <!-- Check-in / Check-out -->
+                        <!-- Check-in / Check-out Dates -->
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Check-in Date *</label>
@@ -92,6 +82,20 @@
                             </div>
                         </div>
 
+                        <!-- Number of Guests -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Number of Guests *</label>
+                                <select id="guests" name="guests" required onchange="calculateTotal()">
+                                    <option value="">Select</option>
+                                    <option value="1">1 Guest</option>
+                                    <option value="2" selected>2 Guests</option>
+                                    <option value="3">3 Guests</option>
+                                    <option value="4">4 Guests</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <!-- Special Requests -->
                         <div class="form-row full-width">
                             <div class="form-group">
@@ -110,13 +114,21 @@
 
             <!-- Booking Summary -->
             <div class="reservation-info">
-                <h3>Booking Summary</h3>
+                <h3>📋 Booking Summary</h3>
                 <div class="booking-summary" id="bookingSummary">
                     <div class="summary-section">
                         <h4>Room Details</h4>
                         <div class="summary-item">
+                            <span>Room #:</span>
+                            <span id="summaryRoomNumber">-</span>
+                        </div>
+                        <div class="summary-item">
                             <span>Room Type:</span>
                             <span id="summaryRoomType">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Capacity:</span>
+                            <span id="summaryCapacity">-</span>
                         </div>
                         <div class="summary-item">
                             <span>Price per Night:</span>
@@ -255,8 +267,129 @@
     background: #f8fbff;
 }
 
-.room-display {
-    margin-top: 8px;
+/* ✅ ROOM PANELS GRID */
+.rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+    padding: 15px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+/* ✅ ROOM PANEL CARD */
+.room-panel {
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    font-weight: 600;
+    position: relative;
+}
+
+/* 🟢 AVAILABLE ROOM - GREEN */
+.room-panel.available {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.room-panel.available:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* 🔴 BOOKED - RED */
+.room-panel.booked {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.room-panel.booked::after {
+    content: '🔒';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 12px;
+}
+
+/* 🔴 MAINTENANCE - RED */
+.room-panel.maintenance {
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.room-panel.maintenance::after {
+    content: '🔧';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 12px;
+}
+
+/* 🔴 INACTIVE - RED */
+.room-panel.inactive {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.room-panel.inactive::after {
+    content: '✕';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 14px;
+}
+
+/* ✅ SELECTED ROOM */
+.room-panel.selected {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.room-panel.selected::before {
+    content: '✓';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #007bff;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.room-panel-number {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.room-panel-type {
+    font-size: 11px;
+    opacity: 0.9;
+    margin-bottom: 3px;
+}
+
+.room-panel-price {
+    font-size: 10px;
+    opacity: 0.85;
 }
 
 .form-navigation {
@@ -435,6 +568,10 @@
     .reservation-container {
         gap: 20px;
     }
+    
+    .rooms-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    }
 }
 
 @media (max-width: 480px) {
@@ -449,61 +586,135 @@
     .reservation-info {
         padding: 20px;
     }
+    
+    .rooms-grid {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 8px;
+    }
 }
 </style>
 
-
-
-
 <script>
-console.log('🚀 Reservation page script loading...');
+console.log('🚀 Room Booking Panels - Pure JavaScript');
 
-// Global variables
+const RESERVATION_BASE_URL = window.location.origin;
+const RESERVATION_CONTEXT_PATH = '/OceanViewResort';
+
 var reservationPageData = {
-    bookingData: null,
+    allRooms: [],
+    selectedRoom: null,
     currentStep: 1,
     initialized: false,
     userId: null
 };
 
-// Initialize reservation page
+// Load rooms
+function loadReservationRooms() {
+    const url = RESERVATION_BASE_URL + RESERVATION_CONTEXT_PATH + '/rooms?action=getAll';
+    console.log('📥 Loading rooms from:', url);
+    
+    fetch(url)
+        .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
+        .then(data => {
+            console.log('✅ Rooms data:', data);
+            reservationPageData.allRooms = Array.isArray(data) ? data : [];
+            displayReservationRooms();
+        })
+        .catch(e => {
+            console.error('❌ Error:', e);
+            alert('❌ Error loading rooms: ' + e.message);
+        });
+}
+
+// Display rooms as colored panels
+function displayReservationRooms() {
+    console.log('🎨 Displaying room panels:', reservationPageData.allRooms.length);
+    
+    const container = document.getElementById('roomsContainer');
+    if (!container) return;
+
+    if (!reservationPageData.allRooms || reservationPageData.allRooms.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #999;">No rooms available</div>';
+        return;
+    }
+
+    let html = '';
+    reservationPageData.allRooms.forEach(room => {
+        let panelClass = 'room-panel';
+        let isClickable = true;
+
+        // Determine status and color
+        if (room.status !== 'active') {
+            panelClass += ' inactive';
+            isClickable = false;
+        } else if (room.booking_status === 'booked') {
+            panelClass += ' booked';
+            isClickable = false;
+        } else if (room.maintenance === 'maintenance') {
+            panelClass += ' maintenance';
+            isClickable = false;
+        } else {
+            panelClass += ' available';
+        }
+
+        let panelHtml = '<div class="' + panelClass + '"';
+        panelHtml += ' data-room-id="' + room.id + '"';
+        panelHtml += ' data-room-number="' + room.room_number + '"';
+        panelHtml += ' data-room-type="' + room.room_type + '"';
+        panelHtml += ' data-room-price="' + room.room_price + '"';
+        panelHtml += ' data-room-capacity="' + room.capacity + '"';
+        
+        if (isClickable) {
+            panelHtml += ' onclick="selectReservationRoom(this)"';
+        }
+        
+        panelHtml += '>';
+        panelHtml += '<div class="room-panel-number">#' + room.room_number + '</div>';
+        panelHtml += '<div class="room-panel-type">' + room.room_type + '</div>';
+        panelHtml += '<div class="room-panel-price">LKR ' + room.room_price + '</div>';
+        panelHtml += '</div>';
+        
+        html += panelHtml;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Select room
+function selectReservationRoom(panel) {
+    console.log('✅ Room selected');
+
+    const roomId = panel.dataset.roomId;
+    const roomNumber = panel.dataset.roomNumber;
+    const roomType = panel.dataset.roomType;
+    const roomPrice = panel.dataset.roomPrice;
+    const capacity = panel.dataset.roomCapacity;
+
+    reservationPageData.selectedRoom = { roomId, roomNumber, roomType, roomPrice, capacity };
+
+    document.getElementById('roomId').value = roomId;
+    document.getElementById('roomPrice').value = roomPrice;
+    document.getElementById('roomType').value = roomType;
+
+    document.querySelectorAll('.room-panel').forEach(p => {
+        p.classList.remove('selected');
+    });
+    panel.classList.add('selected');
+
+    updateReservationSummary();
+    calculateReservationTotal();
+}
+
+// Initialize
 function initializeReservationPage() {
     console.log('📄 Initializing reservation page...');
     
-    if (reservationPageData.initialized) {
-        console.log('⚠️ Page already initialized');
-        return;
-    }
+    if (reservationPageData.initialized) return;
     
     try {
-        // Get booking data from sessionStorage
-        const storedData = sessionStorage.getItem('bookingData');
-        
-        if (storedData) {
-            reservationPageData.bookingData = JSON.parse(storedData);
-            console.log('📦 Booking data retrieved:', reservationPageData.bookingData);
-            
-            // Pre-fill room information
-            const roomType = document.getElementById('roomType');
-            const roomPrice = document.getElementById('roomPrice');
-            
-            if (roomType && roomPrice) {
-                roomType.value = reservationPageData.bookingData.roomType;
-                roomPrice.value = reservationPageData.bookingData.price;
-                
-                document.getElementById('displayRoomName').textContent = reservationPageData.bookingData.roomName;
-                document.getElementById('displayRoomDesc').textContent = reservationPageData.bookingData.roomDescription;
-                document.getElementById('displayRoomPrice').textContent = 'LKR ' + reservationPageData.bookingData.price + ' (' + reservationPageData.bookingData.packageCategory.toUpperCase() + ')';
-                
-                // Set check-in and check-out times
-                document.getElementById('checkInTime').value = reservationPageData.bookingData.checkInTime;
-                document.getElementById('checkOutTime').value = reservationPageData.bookingData.checkOutTime;
-            }
-        } else {
-            console.log('⚠️ No booking data found - using defaults');
-        }
-        
-        // Set default dates
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -516,64 +727,41 @@ function initializeReservationPage() {
             checkOutDateInput.valueAsDate = tomorrow;
         }
         
-        // Check if user is logged in and pre-fill guest info
-        checkLoggedInUser();
-        
-        // Attach event listeners
-        attachEventListeners();
-        
-        // Update summary
-        updateSummary();
-        calculateTotal();
+        loadReservationRooms();
+        checkReservationLoggedInUser();
+        attachReservationEventListeners();
+        updateReservationSummary();
+        calculateReservationTotal();
         
         reservationPageData.initialized = true;
-        console.log('✅ Reservation page initialized successfully');
+        console.log('✅ Reservation page initialized');
         
     } catch (error) {
-        console.error('❌ Error initializing reservation page:', error);
+        console.error('❌ Error:', error);
     }
 }
 
-// Check if user is logged in from session
-function checkLoggedInUser() {
-    console.log('👤 Checking logged-in user...');
-    
-    // Get user data from page/session (not via fetch)
-    // This assumes user data is available in the page context
-    const userDataElement = document.getElementById('userData');
-    
-    if (userDataElement) {
-        try {
-            const userData = JSON.parse(userDataElement.textContent);
-            console.log('✅ User logged in:', userData);
-            
-            const firstName = userData.firstName || '';
-            const lastName = userData.lastName || '';
-            const fullName = (firstName + ' ' + lastName).trim();
-            
-            const guestNameInput = document.getElementById('guestName');
-            const emailInput = document.getElementById('email');
-            const contactInput = document.getElementById('contactNumber');
-            
-            if (guestNameInput && fullName) guestNameInput.value = fullName;
-            if (emailInput && userData.email) emailInput.value = userData.email;
-            if (contactInput && userData.phone) contactInput.value = userData.phone;
-            
-            reservationPageData.userId = userData.id;
-            
-            updateSummary();
-        } catch (e) {
-            console.log('⚠️ Could not parse user data');
-        }
-    } else {
-        console.log('ℹ️ No logged-in user data found - guest will enter manually');
+// Check logged in user
+function checkReservationLoggedInUser() {
+    if (typeof currentUser !== 'undefined' && currentUser) {
+        const firstName = currentUser.firstName || '';
+        const lastName = currentUser.lastName || '';
+        const fullName = (firstName + ' ' + lastName).trim() || currentUser.username || currentUser.email.split('@')[0];
+        
+        const guestNameInput = document.getElementById('guestName');
+        const emailInput = document.getElementById('email');
+        const contactInput = document.getElementById('contactNumber');
+        
+        if (guestNameInput && fullName) guestNameInput.value = fullName;
+        if (emailInput && currentUser.email) emailInput.value = currentUser.email;
+        if (contactInput && currentUser.phone) contactInput.value = currentUser.phone;
+        
+        reservationPageData.userId = currentUser.id;
     }
 }
 
 // Attach event listeners
-function attachEventListeners() {
-    console.log('🔗 Attaching event listeners...');
-    
+function attachReservationEventListeners() {
     const reservationForm = document.getElementById('reservationForm');
     if (reservationForm) {
         reservationForm.addEventListener('submit', function(e) {
@@ -582,47 +770,38 @@ function attachEventListeners() {
         });
     }
     
-    const guestNameInput = document.getElementById('guestName');
-    if (guestNameInput) {
-        guestNameInput.addEventListener('change', updateSummary);
-        guestNameInput.addEventListener('input', updateSummary);
-    }
+    const inputs = [
+        document.getElementById('guestName'),
+        document.getElementById('email'),
+        document.getElementById('contactNumber')
+    ];
     
-    const emailInput = document.getElementById('email');
-    if (emailInput) {
-        emailInput.addEventListener('change', updateSummary);
-        emailInput.addEventListener('input', updateSummary);
-    }
+    inputs.forEach(input => {
+        if (input) {
+            input.addEventListener('change', updateReservationSummary);
+            input.addEventListener('input', updateReservationSummary);
+        }
+    });
     
-    const contactInput = document.getElementById('contactNumber');
-    if (contactInput) {
-        contactInput.addEventListener('change', updateSummary);
-        contactInput.addEventListener('input', updateSummary);
-    }
+    const dateInputs = [
+        document.getElementById('checkInDate'),
+        document.getElementById('checkOutDate')
+    ];
     
-    const checkInDateInput = document.getElementById('checkInDate');
-    if (checkInDateInput) {
-        checkInDateInput.addEventListener('change', calculateTotal);
-    }
-    
-    const checkOutDateInput = document.getElementById('checkOutDate');
-    if (checkOutDateInput) {
-        checkOutDateInput.addEventListener('change', calculateTotal);
-    }
+    dateInputs.forEach(input => {
+        if (input) {
+            input.addEventListener('change', calculateReservationTotal);
+        }
+    });
 }
 
-// Calculate total price based on nights
-function calculateTotal() {
-    console.log('💰 Calculating total...');
-    
+// Calculate total
+function calculateReservationTotal() {
     const checkInDateInput = document.getElementById('checkInDate');
     const checkOutDateInput = document.getElementById('checkOutDate');
     const roomPriceInput = document.getElementById('roomPrice');
     
-    if (!checkInDateInput || !checkOutDateInput || !roomPriceInput) {
-        console.log('   Missing input elements');
-        return;
-    }
+    if (!checkInDateInput || !checkOutDateInput || !roomPriceInput) return;
     
     const checkInDate = new Date(checkInDateInput.value);
     const checkOutDate = new Date(checkOutDateInput.value);
@@ -631,10 +810,6 @@ function calculateTotal() {
     if (checkInDate && checkOutDate && checkInDate < checkOutDate && price > 0) {
         const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
         const total = price * nights;
-        
-        console.log('   Nights:', nights);
-        console.log('   Price per night: LKR ' + price);
-        console.log('   Total: LKR ' + total);
         
         const summaryNights = document.getElementById('summaryNights');
         const summaryTotal = document.getElementById('summaryTotal');
@@ -647,13 +822,11 @@ function calculateTotal() {
         }
     }
     
-    updateSummary();
+    updateReservationSummary();
 }
 
-// Update summary display
-function updateSummary() {
-    console.log('📋 Updating summary...');
-    
+// Update summary
+function updateReservationSummary() {
     const guestNameInput = document.getElementById('guestName');
     const emailInput = document.getElementById('email');
     const contactInput = document.getElementById('contactNumber');
@@ -662,90 +835,50 @@ function updateSummary() {
     const checkInTimeInput = document.getElementById('checkInTime');
     const checkOutTimeInput = document.getElementById('checkOutTime');
     
-    const guestName = guestNameInput ? guestNameInput.value || '-' : '-';
-    const email = emailInput ? emailInput.value || '-' : '-';
-    const contact = contactInput ? contactInput.value || '-' : '-';
-    const checkInDate = checkInDateInput ? checkInDateInput.value || '-' : '-';
-    const checkOutDate = checkOutDateInput ? checkOutDateInput.value || '-' : '-';
-    const checkInTime = checkInTimeInput ? checkInTimeInput.value || '-' : '-';
-    const checkOutTime = checkOutTimeInput ? checkOutTimeInput.value || '-' : '-';
+    document.getElementById('summaryGuestName').textContent = guestNameInput ? guestNameInput.value || '-' : '-';
+    document.getElementById('summaryEmail').textContent = emailInput ? emailInput.value || '-' : '-';
+    document.getElementById('summaryContact').textContent = contactInput ? contactInput.value || '-' : '-';
     
-    const summaryGuestName = document.getElementById('summaryGuestName');
-    const summaryEmail = document.getElementById('summaryEmail');
-    const summaryContact = document.getElementById('summaryContact');
-    const summaryCheckIn = document.getElementById('summaryCheckIn');
-    const summaryCheckOut = document.getElementById('summaryCheckOut');
-    
-    if (summaryGuestName) summaryGuestName.textContent = guestName;
-    if (summaryEmail) summaryEmail.textContent = email;
-    if (summaryContact) summaryContact.textContent = contact;
-    
-    if (checkInDate !== '-' && summaryCheckIn) {
-        try {
-            const checkInObj = new Date(checkInDate);
-            summaryCheckIn.textContent = checkInObj.toLocaleDateString() + ' ' + checkInTime;
-        } catch (e) {
-            console.log('   Error formatting check-in date');
-        }
+    if (checkInDateInput && checkInDateInput.value) {
+        const checkInObj = new Date(checkInDateInput.value);
+        const checkInTime = checkInTimeInput ? checkInTimeInput.value || '' : '';
+        document.getElementById('summaryCheckIn').textContent = checkInObj.toLocaleDateString() + ' ' + checkInTime;
     }
     
-    if (checkOutDate !== '-' && summaryCheckOut) {
-        try {
-            const checkOutObj = new Date(checkOutDate);
-            summaryCheckOut.textContent = checkOutObj.toLocaleDateString() + ' ' + checkOutTime;
-        } catch (e) {
-            console.log('   Error formatting check-out date');
-        }
+    if (checkOutDateInput && checkOutDateInput.value) {
+        const checkOutObj = new Date(checkOutDateInput.value);
+        const checkOutTime = checkOutTimeInput ? checkOutTimeInput.value || '' : '';
+        document.getElementById('summaryCheckOut').textContent = checkOutObj.toLocaleDateString() + ' ' + checkOutTime;
     }
     
-    if (reservationPageData.bookingData) {
-        const summaryRoomType = document.getElementById('summaryRoomType');
-        const summaryPrice = document.getElementById('summaryPrice');
-        
-        if (summaryRoomType) summaryRoomType.textContent = reservationPageData.bookingData.roomName;
-        if (summaryPrice) summaryPrice.textContent = 'LKR ' + reservationPageData.bookingData.price;
+    if (reservationPageData.selectedRoom) {
+        document.getElementById('summaryRoomNumber').textContent = '#' + reservationPageData.selectedRoom.roomNumber;
+        document.getElementById('summaryRoomType').textContent = reservationPageData.selectedRoom.roomType;
+        document.getElementById('summaryCapacity').textContent = reservationPageData.selectedRoom.capacity + ' Guests';
+        document.getElementById('summaryPrice').textContent = 'LKR ' + reservationPageData.selectedRoom.roomPrice.toLocaleString();
     }
 }
 
-// Navigate between steps
+// Navigate steps
 function nextStep(step) {
-    console.log('➡️ Moving to step:', step);
-    
-    // Validate step 1
     if (step === 2) {
-        const guestNameInput = document.getElementById('guestName');
-        const emailInput = document.getElementById('email');
-        const contactInput = document.getElementById('contactNumber');
+        const guestName = document.getElementById('guestName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const contact = document.getElementById('contactNumber').value.trim();
         
-        const guestName = guestNameInput ? guestNameInput.value.trim() : '';
-        const email = emailInput ? emailInput.value.trim() : '';
-        const contact = contactInput ? contactInput.value.trim() : '';
-        
-        if (!guestName) {
-            alert('❌ Please enter guest name');
-            return;
-        }
-        if (!email) {
-            alert('❌ Please enter email address');
-            return;
-        }
-        if (!contact) {
-            alert('❌ Please enter contact number');
+        if (!guestName || !email || !contact) {
+            alert('❌ Please fill all required fields');
             return;
         }
     }
     
-    const step1 = document.getElementById('step1');
-    const step2 = document.getElementById('step2');
-    
-    if (step1) step1.style.display = step === 1 ? 'block' : 'none';
-    if (step2) step2.style.display = step === 2 ? 'block' : 'none';
+    document.getElementById('step1').style.display = step === 1 ? 'block' : 'none';
+    document.getElementById('step2').style.display = step === 2 ? 'block' : 'none';
     
     reservationPageData.currentStep = step;
 }
 
 function prevStep(step) {
-    console.log('⬅️ Moving to step:', step);
     nextStep(step);
 }
 
@@ -753,33 +886,19 @@ function prevStep(step) {
 function submitReservation() {
     console.log('📤 Submitting reservation...');
     
-    const guestNameInput = document.getElementById('guestName');
-    const emailInput = document.getElementById('email');
-    const contactInput = document.getElementById('contactNumber');
-    const countrySelect = document.getElementById('country');
-    const roomTypeInput = document.getElementById('roomType');
-    const guestsSelect = document.getElementById('guests');
-    const checkInDateInput = document.getElementById('checkInDate');
-    const checkOutDateInput = document.getElementById('checkOutDate');
-    const checkInTimeInput = document.getElementById('checkInTime');
-    const checkOutTimeInput = document.getElementById('checkOutTime');
-    const specialRequestsInput = document.getElementById('specialRequests');
+    const guestName = document.getElementById('guestName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const contactNumber = document.getElementById('contactNumber').value.trim();
+    const roomId = document.getElementById('roomId').value;
+    const checkInDate = document.getElementById('checkInDate').value;
+    const checkOutDate = document.getElementById('checkOutDate').value;
+    const checkInTime = document.getElementById('checkInTime').value;
+    const checkOutTime = document.getElementById('checkOutTime').value;
+    const guests = document.getElementById('guests').value;
+    const specialRequests = document.getElementById('specialRequests').value;
     
-    const guestName = guestNameInput ? guestNameInput.value.trim() : '';
-    const email = emailInput ? emailInput.value.trim() : '';
-    const contactNumber = contactInput ? contactInput.value.trim() : '';
-    const country = countrySelect ? countrySelect.value : '';
-    const roomType = roomTypeInput ? roomTypeInput.value : '';
-    const guests = guestsSelect ? guestsSelect.value : '1';
-    const checkInDate = checkInDateInput ? checkInDateInput.value : '';
-    const checkOutDate = checkOutDateInput ? checkOutDateInput.value : '';
-    const checkInTime = checkInTimeInput ? checkInTimeInput.value : '';
-    const checkOutTime = checkOutTimeInput ? checkOutTimeInput.value : '';
-    const specialRequests = specialRequestsInput ? specialRequestsInput.value : '';
-    
-    // Validation
-    if (!guestName || !email || !contactNumber || !checkInDate || !checkOutDate) {
-        alert('❌ Please fill all required fields');
+    if (!guestName || !email || !contactNumber || !roomId || !checkInDate || !checkOutDate || !guests) {
+        alert('❌ Please fill all required fields and select a room');
         return;
     }
     
@@ -787,61 +906,45 @@ function submitReservation() {
     params.append('guestName', guestName);
     params.append('email', email);
     params.append('contactNumber', contactNumber);
-    params.append('country', country);
-    params.append('roomType', roomType);
-    params.append('guests', guests);
+    params.append('roomId', roomId);
     params.append('checkInDate', checkInDate);
     params.append('checkOutDate', checkOutDate);
     params.append('checkInTime', checkInTime);
     params.append('checkOutTime', checkOutTime);
+    params.append('guests', guests);
     params.append('specialRequests', specialRequests);
     
-    if (reservationPageData.bookingData) {
-        params.append('roomPrice', reservationPageData.bookingData.price);
-        params.append('packageCategory', reservationPageData.bookingData.packageCategory);
-    }
-    
-    console.log('📤 Sending data:', Object.fromEntries(params));
-    
-    fetch('createReservation', {
+    const url = RESERVATION_BASE_URL + RESERVATION_CONTEXT_PATH + '/createReservation';
+    fetch(url, { 
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString()
     })
-    .then(response => response.json())
+    .then(r => r.json())
     .then(data => {
-        console.log('📥 Response:', data);
-        
         if (data.success) {
-            alert('✅ Reservation created successfully!\nReservation Number: ' + data.reservationNumber);
-            
-            // Clear booking data
-            sessionStorage.removeItem('bookingData');
-            
-            // Redirect to home or confirmation page
+            alert('✅ Reservation created!\nReservation #: ' + data.reservationNumber);
             if (typeof loadPage === 'function') {
                 loadPage('home');
             } else {
                 window.location.href = 'index.jsp';
             }
         } else {
-            alert('❌ ' + (data.message || 'Failed to create reservation'));
+            alert('❌ ' + (data.message || 'Failed'));
         }
     })
-    .catch(error => {
-        console.error('❌ Error:', error);
-        alert('⚠️ Network error occurred');
+    .catch(e => {
+        console.error('❌ Error:', e);
+        alert('⚠️ Network error');
     });
 }
 
-// Initialize when DOM is ready
+// Initialize
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeReservationPage);
 } else {
     initializeReservationPage();
 }
 
-console.log('✅ Reservation page script fully loaded');
+console.log('✅ Room Booking Panels Ready');
 </script>

@@ -30,6 +30,9 @@ public class CheckUserServlet extends HttpServlet {
         try {
             HttpSession session = request.getSession(false);
             
+            System.out.println("\n🔍 CheckUserServlet called");
+            System.out.println("Session exists: " + (session != null));
+            
             // Check if user is logged in via session
             if (session != null && Boolean.TRUE.equals(session.getAttribute("isLoggedIn"))) {
                 Integer userId = (Integer) session.getAttribute("userId");
@@ -37,21 +40,38 @@ public class CheckUserServlet extends HttpServlet {
                 String firstName = (String) session.getAttribute("firstName");
                 String lastName = (String) session.getAttribute("lastName");
                 String phone = (String) session.getAttribute("phone");
+                Object isAdminObj = session.getAttribute("isAdmin");
+                
+                boolean isAdmin = false;
+                if (isAdminObj instanceof Boolean) {
+                    isAdmin = (Boolean) isAdminObj;
+                }
+                
+                System.out.println("✅ User logged in via session");
+                System.out.println("userId: " + userId);
+                System.out.println("userEmail: " + userEmail);
+                System.out.println("isAdmin: " + isAdmin);
                 
                 String displayName = firstName != null && !firstName.trim().isEmpty() 
                     ? firstName 
-                    : userEmail.split("@")[0];
+                    : (userEmail != null ? userEmail.split("@")[0] : "User");
                 
-                String jsonResponse = "{\"loggedIn\":true,\"user\":{\"id\":" + userId + ",\"email\":\"" + userEmail + "\",\"name\":\"" + displayName + "\",\"firstName\":\"" + (firstName != null ? firstName : "") + "\",\"lastName\":\"" + (lastName != null ? lastName : "") + "\",\"phone\":\"" + (phone != null ? phone : "") + "\"},\"autoLogin\":false}";
+                String jsonResponse = "{\"loggedIn\":true,\"user\":{\"id\":" + userId + ",\"email\":\"" + userEmail + "\",\"name\":\"" + displayName + "\",\"firstName\":\"" + (firstName != null ? firstName : "") + "\",\"lastName\":\"" + (lastName != null ? lastName : "") + "\",\"phone\":\"" + (phone != null ? phone : "") + "\",\"isAdmin\":" + isAdmin + "},\"autoLogin\":false}";
+                
+                System.out.println("Response: " + jsonResponse);
                 out.print(jsonResponse);
                 return;
             }
+            
+            System.out.println("❌ No session or not logged in");
             
             // Check remember me cookie
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if ("oceanview_remember".equals(cookie.getName())) {
+                        System.out.println("🍪 Remember me cookie found");
+                        
                         String sessionToken = cookie.getValue();
                         
                         // Check if token is valid and not expired
@@ -70,6 +90,8 @@ public class CheckUserServlet extends HttpServlet {
                                 
                                 try (ResultSet rs = stmt.executeQuery()) {
                                     if (rs.next()) {
+                                        System.out.println("✅ Auto login via remember me cookie");
+                                        
                                         // Auto login successful
                                         int userId = rs.getInt("user_id");
                                         String userEmail = rs.getString("email");
@@ -84,13 +106,14 @@ public class CheckUserServlet extends HttpServlet {
                                         newSession.setAttribute("firstName", firstName);
                                         newSession.setAttribute("lastName", lastName);
                                         newSession.setAttribute("phone", phone);
+                                        newSession.setAttribute("isAdmin", false);  // ✅ Regular user
                                         newSession.setAttribute("isLoggedIn", true);
                                         
                                         String displayName = firstName != null && !firstName.trim().isEmpty() 
                                             ? firstName 
                                             : userEmail.split("@")[0];
                                         
-                                        String jsonResponse = "{\"loggedIn\":true,\"user\":{\"id\":" + userId + ",\"email\":\"" + userEmail + "\",\"name\":\"" + displayName + "\",\"firstName\":\"" + (firstName != null ? firstName : "") + "\",\"lastName\":\"" + (lastName != null ? lastName : "") + "\",\"phone\":\"" + (phone != null ? phone : "") + "\"},\"autoLogin\":true}";
+                                        String jsonResponse = "{\"loggedIn\":true,\"user\":{\"id\":" + userId + ",\"email\":\"" + userEmail + "\",\"name\":\"" + displayName + "\",\"firstName\":\"" + (firstName != null ? firstName : "") + "\",\"lastName\":\"" + (lastName != null ? lastName : "") + "\",\"phone\":\"" + (phone != null ? phone : "") + "\",\"isAdmin\":false},\"autoLogin\":true}";
                                         out.print(jsonResponse);
                                         return;
                                     }
@@ -102,10 +125,12 @@ public class CheckUserServlet extends HttpServlet {
                 }
             }
             
+            System.out.println("📝 Not logged in");
             // Not logged in
             out.print("{\"loggedIn\":false}");
             
         } catch (Exception e) {
+            System.out.println("❌ CheckUserServlet Error: " + e.getMessage());
             e.printStackTrace();
             out.print("{\"loggedIn\":false,\"error\":\"" + e.getMessage() + "\"}");
         }

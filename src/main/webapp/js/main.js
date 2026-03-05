@@ -1,4 +1,4 @@
-console.log("✅ main.js loaded successfully!");
+console.log("✅ main.js loading...");
 
 let currentUser = null;
 let isUserLoggedIn = false;
@@ -37,54 +37,90 @@ $(document).ready(function() {
     });
 });
 
-
-
-
-// In main.js, update checkUserStatusOnLoad():
-
+// ✅✅✅ MAIN USER STATUS CHECK - WITH ADMIN/STAFF REDIRECT ✅✅✅
 function checkUserStatusOnLoad() {
-    console.log('🔍 Checking user status...');
+    console.log('\n╔═══════════════════════════════════════════╗');
+    console.log('║  🔍 CHECKING USER STATUS ON PAGE LOAD    ║');
+    console.log('╚═══════════════════════════════════════════╝\n');
+    
     $.ajax({
         url: 'checkUser',
         type: 'GET',
         dataType: 'json',
+        timeout: 5000,
         success: function(data) {
             console.log('📊 User status response:', data);
+            console.log('   - loggedIn:', data.loggedIn);
+            console.log('   - user:', data.user);
             
             if (data.loggedIn) {
                 currentUser = data.user;
                 isUserLoggedIn = true;
                 
-                // ✅ CHECK IF ADMIN - DIRECT REDIRECT
-                if (data.user.isAdmin) {
-                    console.log('🔐 Admin user detected - DIRECT REDIRECT');
+                console.log('\n✅ USER IS LOGGED IN');
+                console.log('   - Username:', data.user.username || data.user.name);
+                console.log('   - Email:', data.user.email);
+                console.log('   - isAdmin:', data.user.isAdmin);
+                console.log('   - Type:', typeof data.user.isAdmin);
+                
+                // ✅✅✅ CHECK IF ADMIN OR STAFF - IMMEDIATE REDIRECT ✅✅✅
+                // Check both === true and == 1 for compatibility
+                if (data.user.isAdmin === true || data.user.isAdmin == 1 || data.user.isAdmin === 1) {
+                    console.log('\n🔐🔐🔐 ADMIN/STAFF DETECTED 🔐🔐🔐');
+                    console.log('   - isAdmin value:', data.user.isAdmin);
+                    console.log('   - isAdmin === true:', data.user.isAdmin === true);
+                    console.log('   - isAdmin == 1:', data.user.isAdmin == 1);
+                    console.log('⏰ REDIRECTING TO admin-dashboard.jsp NOW...\n');
+                    
                     isAdminLoggedIn = true;
                     
-                    // ⚠️ DIRECT REDIRECT - NO NAVBAR UPDATE
-                    console.log('🔄 Redirecting directly to admin-dashboard.jsp...');
+                    // ✅ STOP ALL JQUERY HANDLERS
+                    $(document).off();
+                    
+                    // ✅ MULTIPLE REDIRECT METHODS FOR RELIABILITY
+                    console.log('🔄 Attempting redirect...');
+                    
+                    // Method 1: Direct window.location
                     window.location.href = 'admin-dashboard.jsp';
-                    return; // Stop execution
+                    
+                    // Method 2: Backup with replace
+                    setTimeout(() => {
+                        window.location.replace('admin-dashboard.jsp');
+                    }, 100);
+                    
+                    // Method 3: Top location
+                    setTimeout(() => {
+                        window.top.location = 'admin-dashboard.jsp';
+                    }, 200);
+                    
+                    return; // STOP ALL CODE EXECUTION
                 } else {
-                    console.log('👤 Regular user detected');
+                    console.log('\n👤 REGULAR USER DETECTED');
+                    console.log('   - isAdmin value:', data.user.isAdmin);
+                    console.log('📝 Updating navbar and loading home page...\n');
+                    
                     updateNavbarForLoggedInUser(data.user);
                     loadPage('home');
                 }
             } else {
-                console.log('📝 No user logged in');
+                console.log('\n📝 NO USER LOGGED IN');
+                console.log('📝 Showing login form...\n');
+                
                 updateNavbarForLoggedOutUser();
                 loadPage('home');
             }
         },
-        error: function(error) {
-            console.error('❌ Error checking user status:', error);
+        error: function(xhr, status, error) {
+            console.error('❌ Error checking user status:');
+            console.error('   - Status:', status);
+            console.error('   - Error:', error);
+            console.error('   - Response:', xhr.responseText);
+            
             updateNavbarForLoggedOutUser();
             loadPage('home');
         }
     });
 }
-
-
-
 
 // ✅ UPDATE NAVBAR FOR ADMIN USER
 function updateNavbarForAdminUser(user) {
@@ -169,7 +205,11 @@ window.logoutUser = function() {
 };
 
 // ✅ ADMIN LOGOUT FUNCTION
-window.adminLogout = function() {
+window.adminLogout = function(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    
     if (!confirm('Are you sure you want to logout from admin panel?')) return;
     
     console.log('👋 Admin logging out...');
@@ -186,18 +226,18 @@ window.adminLogout = function() {
             currentUser = null;
             
             // Redirect to login
-            window.location.href = 'index.jsp';
+            window.location.replace('index.jsp');
         },
         error: function(error) {
             console.error('❌ Admin logout error:', error);
-            window.location.href = 'index.jsp';
+            window.location.replace('index.jsp');
         }
     });
 };
 
 // ✅ MAIN LOAD FUNCTION - NO VALIDATION
 function loadPage(pageName) {
-    console.log("📄 Loading:", pageName);
+    console.log("📄 Loading page:", pageName);
     
     if (!pageName || !pageName.trim()) {
         pageName = 'home';
@@ -439,4 +479,4 @@ window.isUserLoggedIn = isUserLoggedIn;
 window.isAdminLoggedIn = isAdminLoggedIn;
 window.currentUser = currentUser;
 
-console.log("✅ main.js fully loaded with admin support!");
+console.log("✅ main.js fully loaded with admin/staff redirect support!\n");

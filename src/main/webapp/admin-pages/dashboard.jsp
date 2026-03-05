@@ -157,7 +157,7 @@
     <div class="stat-card success">
         <div class="stat-icon">💰</div>
         <div class="stat-label">Total Revenue</div>
-        <div class="stat-value" id="totalRevenue">$0</div>
+        <div class="stat-value" id="totalRevenue">0</div>
         <div class="stat-change">💵 Paid</div>
     </div>
     
@@ -222,13 +222,13 @@
     let paymentChartInstance = null;
     let revenueChartInstance = null;
 
-    function loadDashboardData() {
-        console.log('📊 Loading dashboard data...');
+    function loadDashboardStats() {
+        const baseUrl = window.location.origin + '/OceanViewResort';
         
-        // Load stats
-        fetch('/OceanViewResort/dashboard?action=getStats')
+        fetch(baseUrl + '/dashboard?action=getStats')
             .then(r => r.json())
             .then(data => {
+                console.log('✅ Stats response:', data);
                 if (data.success) {
                     document.getElementById('totalReservations').textContent = data.totalReservations || 0;
                     document.getElementById('confirmedReservations').textContent = data.confirmedReservations || 0;
@@ -242,20 +242,18 @@
                 }
             })
             .catch(e => console.error('❌ Error loading stats:', e));
-        
-        // Load charts
-        loadReservationChart();
-        loadOccupancyChart();
-        loadPaymentChart();
-        loadRevenueChart();
     }
 
     function loadReservationChart() {
-        fetch('/OceanViewResort/dashboard?action=getReservationChart')
+        const baseUrl = window.location.origin + '/OceanViewResort';
+        
+        fetch(baseUrl + '/dashboard?action=getReservationChart')
             .then(r => r.json())
             .then(data => {
-                if (data.success) {
-                    document.getElementById('reservationChartContainer').innerHTML = '<canvas id="reservationChart"></canvas>';
+                console.log('✅ Reservation chart data:', data);
+                if (data.success && data.labels && data.data) {
+                    const container = document.getElementById('reservationChartContainer');
+                    container.innerHTML = '<canvas id="reservationChart"></canvas>';
                     
                     if (reservationChartInstance) reservationChartInstance.destroy();
                     
@@ -291,11 +289,15 @@
     }
 
     function loadOccupancyChart() {
-        fetch('/OceanViewResort/dashboard?action=getRoomOccupancy')
+        const baseUrl = window.location.origin + '/OceanViewResort';
+        
+        fetch(baseUrl + '/dashboard?action=getRoomOccupancy')
             .then(r => r.json())
             .then(data => {
-                if (data.success) {
-                    document.getElementById('occupancyChartContainer').innerHTML = '<canvas id="occupancyChart"></canvas>';
+                console.log('✅ Occupancy chart data:', data);
+                if (data.success && data.labels && data.data) {
+                    const container = document.getElementById('occupancyChartContainer');
+                    container.innerHTML = '<canvas id="occupancyChart"></canvas>';
                     
                     if (occupancyChartInstance) occupancyChartInstance.destroy();
                     
@@ -331,11 +333,15 @@
     }
 
     function loadPaymentChart() {
-        fetch('/OceanViewResort/dashboard?action=getPaymentStatus')
+        const baseUrl = window.location.origin + '/OceanViewResort';
+        
+        fetch(baseUrl + '/dashboard?action=getPaymentStatus')
             .then(r => r.json())
             .then(data => {
-                if (data.success) {
-                    document.getElementById('paymentChartContainer').innerHTML = '<canvas id="paymentChart"></canvas>';
+                console.log('✅ Payment chart data:', data);
+                if (data.success && data.labels && data.data) {
+                    const container = document.getElementById('paymentChartContainer');
+                    container.innerHTML = '<canvas id="paymentChart"></canvas>';
                     
                     if (paymentChartInstance) paymentChartInstance.destroy();
                     
@@ -371,11 +377,15 @@
     }
 
     function loadRevenueChart() {
-        fetch('/OceanViewResort/dashboard?action=getRevenueChart')
+        const baseUrl = window.location.origin + '/OceanViewResort';
+        
+        fetch(baseUrl + '/dashboard?action=getRevenueChart')
             .then(r => r.json())
             .then(data => {
-                if (data.success) {
-                    document.getElementById('revenueChartContainer').innerHTML = '<canvas id="revenueChart"></canvas>';
+                console.log('✅ Revenue chart data:', data);
+                if (data.success && data.labels && data.data) {
+                    const container = document.getElementById('revenueChartContainer');
+                    container.innerHTML = '<canvas id="revenueChart"></canvas>';
                     
                     if (revenueChartInstance) revenueChartInstance.destroy();
                     
@@ -426,11 +436,22 @@
             .catch(e => console.error('❌ Error loading revenue chart:', e));
     }
 
-    // ✅ THIS IS THE KEY - FUNCTION THAT ADMIN DASHBOARD WILL CALL
+    // ✅ THIS FUNCTION IS CALLED BY ADMIN DASHBOARD
     function initDashboardPage() {
         console.log('🔧 Initializing Dashboard page...');
-        loadDashboardData();
+        loadDashboardStats();
+        loadReservationChart();
+        loadOccupancyChart();
+        loadPaymentChart();
+        loadRevenueChart();
+        
         // Refresh every 30 seconds
-        setInterval(loadDashboardData, 30000);
+        setInterval(() => {
+            loadDashboardStats();
+            loadReservationChart();
+            loadOccupancyChart();
+            loadPaymentChart();
+            loadRevenueChart();
+        }, 30000);
     }
 </script>

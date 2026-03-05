@@ -31,16 +31,16 @@ public class LoginServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         try {
-            // Get parameters - now using loginField instead of email
-            String loginField = request.getParameter("loginField");  // Can be username or email
+            String loginField = request.getParameter("loginField");
             String password = request.getParameter("password");
             String remember = request.getParameter("remember");
 
-            System.out.println("=== LOGIN REQUEST ===");
+            System.out.println("\n╔════════════════════════════════════╗");
+            System.out.println("║     LOGIN REQUEST RECEIVED         ║");
+            System.out.println("╚════════════════════════════════════╝");
             System.out.println("Login Field: " + loginField);
             System.out.println("Remember: " + remember);
 
-            // Validation
             if (loginField == null || loginField.trim().isEmpty()) {
                 out.print("{\"success\":false,\"message\":\"Username or email is required\"}");
                 return;
@@ -53,41 +53,8 @@ public class LoginServlet extends HttpServlet {
 
             loginField = loginField.trim();
             boolean isRemember = "true".equals(remember);
+            String hashedPassword = sha256(password);
 
-         // In LoginServlet.java, update the admin login response:
-
-            if (loginField.equals("ADMIN") && password.equals("ADMIN@123")) {
-                System.out.println("✅ ADMIN LOGIN DETECTED");
-                
-                HttpSession session = request.getSession(true);
-                session.setAttribute("userId", 0);
-                session.setAttribute("username", "ADMIN");
-                session.setAttribute("email", "admin@oceanview.lk");
-                session.setAttribute("firstName", "Admin");
-                session.setAttribute("lastName", "User");
-                session.setAttribute("isAdmin", true);
-                session.setAttribute("phone", "+94 77 123 4567");
-                session.setAttribute("loginTime", System.currentTimeMillis());
-                
-                System.out.println("✅ Admin session created");
-                
-                out.print("{\"success\":true,\"message\":\"Admin login successful\",\"isAdmin\":true,\"redirectUrl\":\"admin-dashboard.jsp\",\"user\":{" +
-                        "\"id\":0," +
-                        "\"username\":\"ADMIN\"," +
-                        "\"email\":\"admin@oceanview.lk\"," +
-                        "\"firstName\":\"Admin\"," +
-                        "\"lastName\":\"User\"," +
-                        "\"phone\":\"+94 77 123 4567\"," +
-                        "\"isAdmin\":true" +
-                        "}}");
-                return;
-            }
-
-
-            // Regular user login
-            loginField = loginField.trim().toLowerCase();
-            
-            // Database connection
             String url = "jdbc:mysql://localhost:3306/oceanview?useSSL=false&serverTimezone=UTC";
             String dbUser = "root";
             String dbPassword = "";
@@ -96,139 +63,140 @@ public class LoginServlet extends HttpServlet {
             
             try (Connection conn = DriverManager.getConnection(url, dbUser, dbPassword)) {
                 
-                // Hash password for comparison
-                String hashedPassword = sha256(password);
+                // ✅ STEP 1: CHECK USERS TABLE
+                System.out.println("\n🔍 STEP 1: Checking USERS table...");
+                String userSql = "SELECT id, username, email, password, first_name, last_name, phone FROM users WHERE (LOWER(username) = ? OR LOWER(email) = ?) AND password = ?";
                 
-                // UPDATED: Check both username and email
-                String sql = "SELECT id, username, email, password, first_name, last_name, phone FROM users WHERE (LOWER(username) = ? OR LOWER(email) = ?) AND password = ?";
-                
-                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                    stmt.setString(1, loginField);  // Check username
-                    stmt.setString(2, loginField);  // Check email
-                    stmt.setString(3, hashedPassword);
+                try (PreparedStatement userStmt = conn.prepareStatement(userSql)) {
+                    userStmt.setString(1, loginField.toLowerCase());
+                    userStmt.setString(2, loginField.toLowerCase());
+                    userStmt.setString(3, hashedPassword);
                     
-                    try (ResultSet rs = stmt.executeQuery()) {
-                        if (rs.next()) {
-                            // Login successful
-                            int userId = rs.getInt("id");
-                            String username = rs.getString("username");
-                            String email = rs.getString("email");
-                            String firstName = rs.getString("first_name");
-                            String lastName = rs.getString("last_name");
-                            String phone = rs.getString("phone");
+                    try (ResultSet userRs = userStmt.executeQuery()) {
+                        if (userRs.next()) {
+                            System.out.println("✅ USER FOUND IN USERS TABLE!");
                             
-                            System.out.println("✅ Login successful for user: " + username + " (" + email + ")");
+                            int userId = userRs.getInt("id");
+                            String username = userRs.getString("username");
+                            String email = userRs.getString("email");
+                            String firstName = userRs.getString("first_name");
+                            String lastName = userRs.getString("last_name");
+                            String phone = userRs.getString("phone");
                             
-                            // Create session
                             HttpSession session = request.getSession(true);
                             session.setAttribute("userId", userId);
                             session.setAttribute("username", username);
+                            session.setAttribute("userEmail", email);
                             session.setAttribute("email", email);
                             session.setAttribute("firstName", firstName);
                             session.setAttribute("lastName", lastName);
                             session.setAttribute("phone", phone);
                             session.setAttribute("isAdmin", false);
-                            session.setAttribute("loginTime", System.currentTimeMillis());
+                            session.setAttribute("isLoggedIn", true);  // ✅ IMPORTANT
+                            session.setAttribute("role", "USER");
                             
-                            // Update last login
-                            try (PreparedStatement updateStmt = conn.prepareStatement("UPDATE users SET last_login = NOW() WHERE id = ?")) {
-                                updateStmt.setInt(1, userId);
-                                updateStmt.executeUpdate();
-                            }
+                            System.out.println("✅ USER SESSION CREATED");
+                            System.out.println("🔐 isAdmin = false");
+                            System.out.println("🔐 isLoggedIn = true");
+                            System.out.println("📍 REDIRECT TO: index.jsp\n");
                             
-                            // Handle remember me
-                            if (isRemember) {
-                                String rememberToken = UUID.randomUUID().toString();
-                                
-                                // Save to database
-                                try (PreparedStatement rememberStmt = conn.prepareStatement(
-                                        "INSERT INTO user_sessions (session_id, user_id, ip_address, user_agent, is_remember_me, expires_at) VALUES (?, ?, ?, ?, ?, ?)")) {
-                                    rememberStmt.setString(1, rememberToken);
-                                    rememberStmt.setInt(2, userId);
-                                    rememberStmt.setString(3, request.getRemoteAddr());
-                                    rememberStmt.setString(4, request.getHeader("User-Agent"));
-                                    rememberStmt.setBoolean(5, true);
-                                    // 30 days from now
-                                    rememberStmt.setTimestamp(6, new Timestamp(System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000)));
-                                    rememberStmt.executeUpdate();
-                                }
-                                
-                                // Set cookie
-                                Cookie rememberCookie = new Cookie("oceanview_remember", rememberToken);
-                                rememberCookie.setMaxAge(30 * 24 * 60 * 60); // 30 days
-                                rememberCookie.setPath("/");
-                                rememberCookie.setHttpOnly(true);
-                                response.addCookie(rememberCookie);
-                                
-                                System.out.println("✅ Remember me token created: " + rememberToken);
-                            }
-                            
-                            // Log successful login
-                            try (PreparedStatement logStmt = conn.prepareStatement(
-                                    "INSERT INTO user_logins (user_id, login_method, login_status, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)")) {
-                                logStmt.setInt(1, userId);
-                                logStmt.setString(2, loginField.contains("@") ? "EMAIL" : "USERNAME");
-                                logStmt.setString(3, "SUCCESS");
-                                logStmt.setString(4, request.getRemoteAddr());
-                                logStmt.setString(5, request.getHeader("User-Agent"));
-                                logStmt.executeUpdate();
-                            }
-                            
-                            // Return success with user data
-                            String displayName = firstName != null && !firstName.equals("User") ? firstName : username;
-                            String loginMethod = loginField.contains("@") ? "email" : "username";
-                            
-                            out.print("{\"success\":true,\"message\":\"Welcome back, " + displayName + "! Logged in via " + loginMethod + ".\",\"isAdmin\":false,\"user\":{" +
-                                    "\"id\":" + userId + "," +
-                                    "\"username\":\"" + username + "\"," +
-                                    "\"email\":\"" + email + "\"," +
-                                    "\"firstName\":\"" + firstName + "\"," +
-                                    "\"lastName\":\"" + lastName + "\"," +
-                                    "\"phone\":\"" + phone + "\"," +
-                                    "\"isAdmin\":false" +
-                                    "}}");
-                            
-                        } else {
-                            // Login failed - check if user exists
-                            String checkUserSql = "SELECT id FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?";
-                            try (PreparedStatement checkStmt = conn.prepareStatement(checkUserSql)) {
-                                checkStmt.setString(1, loginField);
-                                checkStmt.setString(2, loginField);
-                                
-                                try (ResultSet checkRs = checkStmt.executeQuery()) {
-                                    if (checkRs.next()) {
-                                        // User exists but password wrong
-                                        System.out.println("❌ Wrong password for: " + loginField);
-                                        
-                                        // Log failed login
-                                        int userId = checkRs.getInt("id");
-                                        try (PreparedStatement logStmt = conn.prepareStatement(
-                                                "INSERT INTO user_logins (user_id, login_method, login_status, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)")) {
-                                            logStmt.setInt(1, userId);
-                                            logStmt.setString(2, loginField.contains("@") ? "EMAIL" : "USERNAME");
-                                            logStmt.setString(3, "FAILED");
-                                            logStmt.setString(4, request.getRemoteAddr());
-                                            logStmt.setString(5, request.getHeader("User-Agent"));
-                                            logStmt.executeUpdate();
-                                        }
-                                        
-                                        out.print("{\"success\":false,\"message\":\"Incorrect password. Please try again.\",\"isAdmin\":false}");
-                                    } else {
-                                        // User doesn't exist
-                                        System.out.println("❌ User not found: " + loginField);
-                                        out.print("{\"success\":false,\"message\":\"No account found with this username or email.\",\"isAdmin\":false}");
-                                    }
-                                }
-                            }
+                            out.print("{\"success\":true,\"message\":\"User login successful!\",\"isAdmin\":false,\"user\":{\"id\":" + userId + ",\"username\":\"" + username + "\",\"email\":\"" + email + "\",\"firstName\":\"" + firstName + "\",\"lastName\":\"" + lastName + "\",\"isAdmin\":false}}");
+                            return;
                         }
                     }
                 }
+                
+                System.out.println("❌ User not found in USERS table\n");
+                
+                // ✅ STEP 2: CHECK STAFF TABLE
+                System.out.println("🔍 STEP 2: Checking STAFF table...");
+                String staffSql = "SELECT id, username, email, password, name, phone FROM staff WHERE (LOWER(username) = ? OR LOWER(email) = ?) AND password = ?";
+                
+                try (PreparedStatement staffStmt = conn.prepareStatement(staffSql)) {
+                    staffStmt.setString(1, loginField.toLowerCase());
+                    staffStmt.setString(2, loginField.toLowerCase());
+                    staffStmt.setString(3, hashedPassword);
+                    
+                    try (ResultSet staffRs = staffStmt.executeQuery()) {
+                        if (staffRs.next()) {
+                            System.out.println("✅ STAFF FOUND IN STAFF TABLE!");
+                            
+                            int staffId = staffRs.getInt("id");
+                            String username = staffRs.getString("username");
+                            String email = staffRs.getString("email");
+                            String name = staffRs.getString("name");
+                            String phone = staffRs.getString("phone");
+                            
+                            System.out.println("Staff ID: " + staffId);
+                            System.out.println("Username: " + username);
+                            System.out.println("Email: " + email);
+                            
+                            HttpSession session = request.getSession(true);
+                            session.setAttribute("staffId", staffId);
+                            session.setAttribute("userId", staffId);  // Also set as userId
+                            session.setAttribute("username", username);
+                            session.setAttribute("userEmail", email);  // ✅ IMPORTANT - CheckUserServlet looks for this
+                            session.setAttribute("email", email);
+                            session.setAttribute("firstName", name);
+                            session.setAttribute("lastName", "");
+                            session.setAttribute("phone", phone);
+                            session.setAttribute("isAdmin", true);  // ✅ IMPORTANT
+                            session.setAttribute("isLoggedIn", true);  // ✅ IMPORTANT
+                            session.setAttribute("role", "STAFF");
+                            
+                            System.out.println("✅ STAFF SESSION CREATED");
+                            System.out.println("🔐 isAdmin = true");
+                            System.out.println("🔐 isLoggedIn = true");
+                            System.out.println("🔐 userEmail = " + email);
+                            System.out.println("📍 REDIRECT TO: admin-dashboard.jsp\n");
+                            
+                            String jsonResponse = "{\"success\":true,\"message\":\"Staff login successful!\",\"isAdmin\":true,\"user\":{\"id\":" + staffId + ",\"username\":\"" + username + "\",\"email\":\"" + email + "\",\"firstName\":\"" + name + "\",\"lastName\":\"\",\"isAdmin\":true}}";
+                            
+                            System.out.println("JSON Response: " + jsonResponse);
+                            out.print(jsonResponse);
+                            return;
+                        }
+                    }
+                }
+                
+                System.out.println("❌ Staff not found in STAFF table\n");
+                
+                // ✅ STEP 3: CHECK HARDCODED ADMIN
+                System.out.println("🔍 STEP 3: Checking hardcoded ADMIN...");
+                if ("ADMIN".equals(loginField) && "ADMIN@123".equals(password)) {
+                    System.out.println("✅ HARDCODED ADMIN LOGIN!");
+                    
+                    HttpSession session = request.getSession(true);
+                    session.setAttribute("staffId", 999);
+                    session.setAttribute("userId", 999);
+                    session.setAttribute("username", "ADMIN");
+                    session.setAttribute("userEmail", "admin@oceanview.lk");
+                    session.setAttribute("email", "admin@oceanview.lk");
+                    session.setAttribute("firstName", "Admin");
+                    session.setAttribute("lastName", "User");
+                    session.setAttribute("phone", "+94 77 123 4567");
+                    session.setAttribute("isAdmin", true);
+                    session.setAttribute("isLoggedIn", true);  // ✅ IMPORTANT
+                    session.setAttribute("role", "ADMIN");
+                    
+                    System.out.println("✅ ADMIN SESSION CREATED");
+                    System.out.println("🔐 isAdmin = true");
+                    System.out.println("🔐 isLoggedIn = true");
+                    System.out.println("📍 REDIRECT TO: admin-dashboard.jsp\n");
+                    
+                    out.print("{\"success\":true,\"message\":\"Admin login successful!\",\"isAdmin\":true,\"user\":{\"id\":999,\"username\":\"ADMIN\",\"email\":\"admin@oceanview.lk\",\"firstName\":\"Admin\",\"lastName\":\"User\",\"isAdmin\":true}}");
+                    return;
+                }
+                
+                System.out.println("❌ LOGIN FAILED - INVALID CREDENTIALS\n");
+                out.print("{\"success\":false,\"message\":\"Invalid username/email or password\",\"isAdmin\":false}");
+                
             }
             
         } catch (Exception e) {
             System.out.println("❌ Login Error: " + e.getMessage());
             e.printStackTrace();
-            out.print("{\"success\":false,\"message\":\"Server error occurred. Please try again later.\",\"isAdmin\":false}");
+            out.print("{\"success\":false,\"message\":\"Server error: " + e.getMessage() + "\",\"isAdmin\":false}");
         }
     }
 

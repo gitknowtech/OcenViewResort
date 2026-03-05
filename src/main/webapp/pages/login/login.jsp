@@ -494,25 +494,14 @@
 </div>
 
 <script>
-console.log('🚀 Login page loaded - ADMIN DIRECT REDIRECT VERSION');
+console.log('🚀 Login page loaded - FINAL ADMIN REDIRECT VERSION v2.0');
 
 let currentLoginPageUser = null;
 
-// Enhanced message function
+// ✅ Enhanced message function
 function showLoginMessage(text, type) {
-    console.log(`LOGIN PAGE ${type.toUpperCase()}: ${text}`);
+    console.log(`📢 LOGIN MESSAGE [${type.toUpperCase()}]: ${text}`);
     
-    // Remove existing messages first
-    const existingMessages = document.querySelectorAll('.message, .main-message');
-    existingMessages.forEach(msg => msg.remove());
-    
-    // Try to use main.js showMessage function first
-    if (typeof showMessage === 'function') {
-        showMessage(text, type);
-        return;
-    }
-    
-    // Fallback to local message display
     const messageDiv = document.getElementById('msg');
     if (messageDiv) {
         messageDiv.textContent = text;
@@ -521,7 +510,7 @@ function showLoginMessage(text, type) {
     }
 }
 
-// Detect login method and show hint
+// ✅ Detect login method
 function detectLoginMethod() {
     const loginField = document.getElementById('loginField');
     const hint = document.getElementById('loginMethodHint');
@@ -545,10 +534,8 @@ function detectLoginMethod() {
     }
 }
 
-// Enhanced form validation
+// ✅ Form validation
 function validateLoginForm() {
-    console.log('🔍 Validating login form...');
-    
     const loginFieldInput = document.getElementById('loginField');
     const passwordInput = document.getElementById('password');
     const loginFieldError = document.getElementById('loginField-error');
@@ -556,21 +543,13 @@ function validateLoginForm() {
     
     if (!loginFieldInput || !passwordInput) {
         console.error('❌ Form elements not found!');
-        showLoginMessage('Form elements not found. Please refresh the page.', 'error');
         return false;
     }
     
     const loginField = loginFieldInput.value.trim();
     const password = passwordInput.value;
     
-    console.log('📊 Form values:', { 
-        loginField: loginField, 
-        loginFieldLength: loginField.length,
-        password: password ? '[HIDDEN]' : 'EMPTY', 
-        passwordLength: password.length 
-    });
-    
-    // Clear previous errors and styling
+    // Clear previous errors
     loginFieldInput.classList.remove('error');
     passwordInput.classList.remove('error');
     if (loginFieldError) loginFieldError.textContent = '';
@@ -578,9 +557,8 @@ function validateLoginForm() {
     
     let isValid = true;
     
-    // Login field validation (username or email)
+    // Validate login field
     if (!loginField) {
-        console.log('❌ Login field is empty');
         if (loginFieldError) {
             loginFieldError.textContent = 'Username or email is required';
             loginFieldError.classList.add('show');
@@ -588,7 +566,6 @@ function validateLoginForm() {
         loginFieldInput.classList.add('error');
         isValid = false;
     } else if (loginField.length < 3) {
-        console.log('❌ Login field too short:', loginField.length);
         if (loginFieldError) {
             loginFieldError.textContent = 'Username or email must be at least 3 characters';
             loginFieldError.classList.add('show');
@@ -596,20 +573,16 @@ function validateLoginForm() {
         loginFieldInput.classList.add('error');
         isValid = false;
     } else if (loginField.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginField)) {
-        console.log('❌ Email format invalid:', loginField);
         if (loginFieldError) {
             loginFieldError.textContent = 'Please enter a valid email address';
             loginFieldError.classList.add('show');
         }
         loginFieldInput.classList.add('error');
         isValid = false;
-    } else {
-        console.log('✅ Login field is valid:', loginField);
     }
     
-    // Password validation
+    // Validate password
     if (!password) {
-        console.log('❌ Password is empty');
         if (passwordError) {
             passwordError.textContent = 'Password is required';
             passwordError.classList.add('show');
@@ -617,22 +590,18 @@ function validateLoginForm() {
         passwordInput.classList.add('error');
         isValid = false;
     } else if (password.length < 3) {
-        console.log('❌ Password too short:', password.length);
         if (passwordError) {
             passwordError.textContent = 'Password must be at least 3 characters';
             passwordError.classList.add('show');
         }
         passwordInput.classList.add('error');
         isValid = false;
-    } else {
-        console.log('✅ Password is valid');
     }
     
-    console.log('📊 Validation result:', isValid);
     return isValid;
 }
 
-// Password toggle
+// ✅ Toggle password visibility
 function togglePasswordVisibility() {
     const passwordInput = document.getElementById('password');
     const toggleBtn = document.querySelector('.toggle-password i');
@@ -648,26 +617,21 @@ function togglePasswordVisibility() {
     }
 }
 
-// Check user status on page load
+// ✅ Check user status on page load
 function checkLoginPageUserStatus() {
-    console.log('🔍 LOGIN PAGE: Checking user login status...');
+    console.log('🔍 Checking user login status...');
     
     fetch('/OceanViewResort/checkUser')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            console.log('📊 LOGIN PAGE: User status:', data);
+            console.log('📊 User status response:', data);
             
             if (data.loggedIn) {
                 currentLoginPageUser = data.user;
                 
                 // ✅ CHECK IF ADMIN - DIRECT REDIRECT
                 if (data.user.isAdmin) {
-                    console.log('🔐 ADMIN DETECTED - DIRECT REDIRECT');
+                    console.log('🔐 ADMIN DETECTED - REDIRECTING TO DASHBOARD');
                     window.location.href = 'admin-dashboard.jsp';
                     return;
                 }
@@ -679,14 +643,14 @@ function checkLoginPageUserStatus() {
             }
         })
         .catch(error => {
-            console.error('❌ LOGIN PAGE: Error checking user status:', error);
+            console.error('❌ Error checking user status:', error);
             showLoginForm();
         });
 }
 
-// Show logged in state
+// ✅ Show logged in state
 function showLoggedInState(user, autoLogin = false) {
-    console.log('✅ LOGIN PAGE: User is logged in:', user);
+    console.log('✅ User is logged in:', user);
     
     const loginContainer = document.getElementById('loginContainer');
     const loggedInContainer = document.getElementById('loggedInContainer');
@@ -694,7 +658,7 @@ function showLoggedInState(user, autoLogin = false) {
     if (loginContainer) loginContainer.style.display = 'none';
     if (loggedInContainer) loggedInContainer.classList.add('show');
     
-    // Update user info in status bar
+    // Update user info
     const displayName = user.username || user.email.split('@')[0];
     const firstLetter = displayName.charAt(0).toUpperCase();
     
@@ -706,37 +670,34 @@ function showLoggedInState(user, autoLogin = false) {
     if (statusUserName) statusUserName.textContent = displayName;
     if (statusUserEmail) statusUserEmail.textContent = user.email;
     
-    // Update user info in welcome container
+    // Update welcome container
     const welcomeUserName = document.getElementById('welcomeUserName');
     const welcomeUsername = document.getElementById('welcomeUsername');
     const welcomeUserEmail = document.getElementById('welcomeUserEmail');
-    const lastLoginTime = document.getElementById('lastLoginTime');
     
     if (welcomeUserName) welcomeUserName.textContent = displayName;
     if (welcomeUsername) welcomeUsername.textContent = user.username;
     if (welcomeUserEmail) welcomeUserEmail.textContent = user.email;
-    if (lastLoginTime) lastLoginTime.textContent = new Date().toLocaleString();
     
     // Show user status bar
     const userStatusBar = document.getElementById('userStatusBar');
     if (userStatusBar) userStatusBar.classList.add('show');
     
-    // Update main navbar using global function
+    // Update main navbar
     if (typeof updateNavbarForLoggedInUser === 'function') {
         updateNavbarForLoggedInUser(user);
     }
     
     if (autoLogin) {
-        showLoginMessage('🎉 Welcome back, ' + displayName + '! Auto-logged in from saved session.', 'info');
+        showLoginMessage('🎉 Welcome back! Auto-logged in.', 'info');
     }
     
-    // Load user stats
     loadUserStats();
 }
 
-// Show login form
+// ✅ Show login form
 function showLoginForm() {
-    console.log('📝 LOGIN PAGE: Showing login form');
+    console.log('📝 Showing login form');
     
     const loginContainer = document.getElementById('loginContainer');
     const loggedInContainer = document.getElementById('loggedInContainer');
@@ -746,7 +707,6 @@ function showLoginForm() {
     if (loggedInContainer) loggedInContainer.classList.remove('show');
     if (userStatusBar) userStatusBar.classList.remove('show');
     
-    // Update main navbar using global function
     if (typeof updateNavbarForLoggedOutUser === 'function') {
         updateNavbarForLoggedOutUser();
     }
@@ -754,7 +714,7 @@ function showLoginForm() {
     currentLoginPageUser = null;
 }
 
-// Load user stats
+// ✅ Load user stats
 function loadUserStats() {
     const totalBookings = document.getElementById('totalBookings');
     const activeBookings = document.getElementById('activeBookings');
@@ -765,17 +725,18 @@ function loadUserStats() {
     if (loyaltyPoints) loyaltyPoints.textContent = Math.floor(Math.random() * 1000) + 100;
 }
 
-// ✅ UPDATED: Login form submission with ADMIN DIRECT REDIRECT
+// ✅✅✅ MAIN LOGIN HANDLER - WITH ADMIN REDIRECT ✅✅✅
 function handleLoginFormSubmission(e) {
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🔐 LOGIN PAGE: Form submitted');
+    console.log('\n\n╔═══════════════════════════════════════════╗');
+    console.log('║  🔐 LOGIN FORM SUBMITTED                  ║');
+    console.log('╚═══════════════════════════════════════════╝\n');
     
-    // Validate form first
+    // Validate form
     if (!validateLoginForm()) {
-        console.log('❌ Form validation failed');
-        showLoginMessage('Please fix the errors above and try again.', 'error');
+        showLoginMessage('Please fix the errors and try again.', 'error');
         return false;
     }
     
@@ -784,8 +745,9 @@ function handleLoginFormSubmission(e) {
     const remember = document.getElementById('remember').checked;
     const loginBtn = document.getElementById('loginBtn');
     
-    console.log('📊 LOGIN PAGE: Sending login request for:', loginField);
-    console.log('📊 LOGIN PAGE: Remember me:', remember);
+    console.log('📊 Login attempt:');
+    console.log('   - Username/Email:', loginField);
+    console.log('   - Remember me:', remember);
     
     // Show loading state
     if (loginBtn) {
@@ -793,15 +755,15 @@ function handleLoginFormSubmission(e) {
         loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
     }
     
-    // Prepare form data with loginField (can be username or email)
+    // Prepare form data
     const formData = new URLSearchParams();
     formData.append('loginField', loginField);
     formData.append('password', password);
     if (remember) formData.append('remember', 'true');
     
-    console.log('📊 LOGIN PAGE: Form data string:', formData.toString());
+    console.log('📤 Sending login request...\n');
     
-    // Send request with proper headers
+    // Send request
     fetch('/OceanViewResort/login', {
         method: 'POST',
         headers: {
@@ -810,15 +772,19 @@ function handleLoginFormSubmission(e) {
         body: formData.toString()
     })
     .then(response => {
-        console.log('📊 LOGIN PAGE: Response status:', response.status);
-        
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error(`HTTP ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        console.log('📊 LOGIN PAGE: Login response:', data);
+        console.log('📥 LOGIN RESPONSE RECEIVED:');
+        console.log('════════════════════════════════════════════');
+        console.log('success:', data.success);
+        console.log('message:', data.message);
+        console.log('isAdmin:', data.isAdmin);
+        console.log('user.isAdmin:', data.user ? data.user.isAdmin : 'N/A');
+        console.log('════════════════════════════════════════════\n');
         
         // Reset button
         if (loginBtn) {
@@ -827,59 +793,68 @@ function handleLoginFormSubmission(e) {
         }
         
         if (data.success) {
-            console.log('✅ LOGIN SUCCESS!');
+            console.log('✅ LOGIN SUCCESSFUL!\n');
             
             // Clear form
             document.getElementById('loginField').value = '';
             document.getElementById('password').value = '';
             document.getElementById('remember').checked = false;
             
-            // ✅ CHECK IF ADMIN - DIRECT REDIRECT
-            if (data.isAdmin || (data.user && data.user.isAdmin)) {
-                console.log('🔐 ADMIN LOGIN - DIRECT REDIRECT TO ADMIN-DASHBOARD');
-                // No message, no delay - direct redirect
-                window.location.href = 'admin-dashboard.jsp';
+            // ✅✅✅ CHECK IF ADMIN ✅✅✅
+            console.log('🔍 CHECKING ADMIN STATUS:');
+            console.log('   data.isAdmin === true:', data.isAdmin === true);
+            console.log('   data.user.isAdmin === true:', data.user.isAdmin === true);
+            
+            if (data.isAdmin === true) {
+                console.log('\n🔐🔐🔐 ADMIN/STAFF LOGIN DETECTED 🔐🔐🔐');
+                console.log('⏰ Redirecting to admin-dashboard.jsp in 2 seconds...\n');
+                
+                showLoginMessage('✅ Staff login successful! Redirecting...', 'success');
+                
+                // REDIRECT AFTER 2 SECONDS
+                setTimeout(() => {
+                    console.log('🔄🔄🔄 REDIRECTING NOW 🔄🔄🔄\n');
+                    window.location.href = 'admin-dashboard.jsp';
+                }, 2000);
                 return;
             }
             
-            // Regular user - show message
+            // Regular user
+            console.log('\n👤 REGULAR USER LOGIN\n');
             showLoginMessage('✅ ' + data.message, 'success');
             
-            // Update main navbar immediately
             if (typeof updateNavbarForLoggedInUser === 'function') {
                 updateNavbarForLoggedInUser(data.user);
             }
             
-            // Show logged in state after delay
             setTimeout(() => {
                 showLoggedInState(data.user);
             }, 1500);
             
         } else {
-            console.log('❌ LOGIN FAILED:', data.message);
+            console.log('❌ LOGIN FAILED: ' + data.message + '\n');
             showLoginMessage('❌ ' + data.message, 'error');
         }
     })
     .catch(error => {
-        console.error('❌ LOGIN PAGE: Login error:', error);
+        console.error('❌ LOGIN ERROR:', error);
         
-        // Reset button
         if (loginBtn) {
             loginBtn.disabled = false;
             loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
         }
         
-        showLoginMessage('⚠️ Network error. Please check your connection and try again.', 'error');
+        showLoginMessage('⚠️ Network error. Please try again.', 'error');
     });
     
     return false;
 }
 
-// Logout function
+// ✅ Logout function
 function logoutFromLoginPage() {
     if (!confirm('Are you sure you want to logout?')) return;
     
-    console.log('👋 LOGIN PAGE: Logging out user...');
+    console.log('👋 Logging out...');
     
     fetch('/OceanViewResort/logout', {
         method: 'POST'
@@ -889,136 +864,91 @@ function logoutFromLoginPage() {
         if (data.success) {
             showLoginMessage('👋 ' + data.message, 'info');
             
-            // Update main navbar
             if (typeof updateNavbarForLoggedOutUser === 'function') {
                 updateNavbarForLoggedOutUser();
             }
             
             showLoginForm();
-        } else {
-            showLoginMessage('❌ Error during logout', 'error');
         }
     })
     .catch(error => {
-        console.error('❌ LOGIN PAGE: Logout error:', error);
-        showLoginMessage('⚠️ Network error during logout', 'error');
+        console.error('❌ Logout error:', error);
+        showLoginMessage('⚠️ Error during logout', 'error');
     });
 }
 
-// Navigation functions
+// ✅ Navigation functions
 function goToSignupPage() {
-    console.log('🔗 LOGIN PAGE: Going to signup');
-    if (typeof loadPage === 'function') {
-        loadPage('login/signup');
-    } else {
-        console.warn('⚠️ loadPage function not available');
-    }
+    if (typeof loadPage === 'function') loadPage('login/signup');
 }
 
 function goToBookingPage() {
-    console.log('🔗 LOGIN PAGE: Going to booking');
-    if (typeof loadPage === 'function') {
-        loadPage('reservation');
-    }
+    if (typeof loadPage === 'function') loadPage('reservation');
 }
 
 function goToBookingsPage() {
-    console.log('🔗 LOGIN PAGE: Going to bookings');
-    if (typeof loadPage === 'function') {
-        loadPage('bookings');
-    }
+    if (typeof loadPage === 'function') loadPage('bookings');
 }
 
 function goToProfilePage() {
-    console.log('🔗 LOGIN PAGE: Going to profile');
-    if (typeof loadPage === 'function') {
-        loadPage('profile');
-    }
+    if (typeof loadPage === 'function') loadPage('profile');
 }
 
 function goToSupportPage() {
-    console.log('🔗 LOGIN PAGE: Going to support');
-    if (typeof loadPage === 'function') {
-        loadPage('support');
-    }
+    if (typeof loadPage === 'function') loadPage('support');
 }
 
-// Real-time validation and login method detection
+// ✅ Real-time validation
 function setupRealTimeValidation() {
     const loginFieldInput = document.getElementById('loginField');
     const passwordInput = document.getElementById('password');
     
     if (loginFieldInput) {
-        // Detect login method on input
         loginFieldInput.addEventListener('input', function() {
             this.classList.remove('error');
-            const loginFieldError = document.getElementById('loginField-error');
-            if (loginFieldError) loginFieldError.textContent = '';
-            
-            // Detect login method
+            const error = document.getElementById('loginField-error');
+            if (error) error.textContent = '';
             detectLoginMethod();
-        });
-        
-        loginFieldInput.addEventListener('blur', function() {
-            const loginField = this.value.trim();
-            const loginFieldError = document.getElementById('loginField-error');
-            
-            this.classList.remove('error');
-            if (loginFieldError) loginFieldError.textContent = '';
-            
-            if (loginField && loginField.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginField)) {
-                this.classList.add('error');
-                if (loginFieldError) {
-                    loginFieldError.textContent = 'Please enter a valid email address';
-                    loginFieldError.classList.add('show');
-                }
-            }
         });
     }
     
     if (passwordInput) {
         passwordInput.addEventListener('input', function() {
             this.classList.remove('error');
-            const passwordError = document.getElementById('password-error');
-            if (passwordError) passwordError.textContent = '';
+            const error = document.getElementById('password-error');
+            if (error) error.textContent = '';
         });
     }
 }
 
-// Initialize when page loads
+// ✅ Initialize on DOM load
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 LOGIN PAGE: DOM loaded, initializing...');
+    console.log('✅ DOM loaded - initializing login page...\n');
     
     setTimeout(checkLoginPageUserStatus, 100);
     
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLoginFormSubmission);
-        console.log('✅ LOGIN PAGE: Form event listener attached');
-    } else {
-        console.error('❌ LOGIN PAGE: Form not found!');
     }
     
     setupRealTimeValidation();
 });
 
-// Also check when this script runs (for AJAX loaded pages)
+// ✅ Also check via timeout for AJAX loaded pages
 setTimeout(function() {
     if (document.getElementById('loginForm')) {
-        console.log('🔄 LOGIN PAGE: Setting up via timeout...');
-        
         checkLoginPageUserStatus();
         
         const loginForm = document.getElementById('loginForm');
         if (loginForm && !loginForm.hasAttribute('data-handler-attached')) {
             loginForm.addEventListener('submit', handleLoginFormSubmission);
             loginForm.setAttribute('data-handler-attached', 'true');
-            console.log('✅ LOGIN PAGE: Form handler attached via timeout');
         }
         
         setupRealTimeValidation();
     }
 }, 200);
 
-console.log('✅ LOGIN PAGE: All functions loaded and ready - ADMIN DIRECT REDIRECT VERSION');
+console.log('✅ LOGIN PAGE READY - FINAL VERSION v2.0\n');
 </script>

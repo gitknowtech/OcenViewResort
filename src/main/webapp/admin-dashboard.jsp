@@ -6,10 +6,21 @@
     String firstName = (String) session.getAttribute("firstName");
     String lastName = (String) session.getAttribute("lastName");
     
-    if (isAdmin == null || !isAdmin || !"ADMIN".equals(username)) {
+    System.out.println("\n╔════════════════════════════════════════════╗");
+    System.out.println("║  🔐 ADMIN DASHBOARD PAGE LOADING          ║");
+    System.out.println("╚════════════════════════════════════════════╝");
+    System.out.println("isAdmin: " + isAdmin);
+    System.out.println("username: " + username);
+    System.out.println("email: " + email);
+    
+    // ✅ FIXED: Check both ADMIN and staff users
+    if (isAdmin == null || !isAdmin) {
+        System.out.println("❌ NOT ADMIN - REDIRECTING TO INDEX\n");
         response.sendRedirect("index.jsp");
         return;
     }
+    
+    System.out.println("✅ ADMIN VERIFIED - LOADING DASHBOARD\n");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -19,18 +30,16 @@
     <title>Admin Dashboard - Ocean View</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
     <!-- ✅ LOAD ALL EXTERNAL SCRIPTS -->
+    <script src="js/dashboard-manager.js"></script>
     <script src="js/staff-manager.js"></script>
     <script src="js/rooms-manager.js"></script>
     <script src="js/users-manager.js"></script>
     <script src="js/reservations-manager.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
     <style>
-        /* ============================================
-           RESET & BASE STYLES
-           ============================================ */
         * { 
             margin: 0; 
             padding: 0; 
@@ -50,9 +59,6 @@
             line-height: 1.5;
         }
         
-        /* ============================================
-           LAYOUT GRID
-           ============================================ */
         .admin-wrapper { 
             display: grid; 
             grid-template-columns: 240px 1fr; 
@@ -60,9 +66,6 @@
             gap: 0;
         }
         
-        /* ============================================
-           SIDEBAR - LEFT
-           ============================================ */
         .admin-sidebar { 
             background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
             color: white; 
@@ -96,9 +99,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
         
-        /* ============================================
-           SIDEBAR HEADER
-           ============================================ */
         .sidebar-header { 
             padding: 20px 16px; 
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -125,9 +125,6 @@
             font-weight: 400;
         }
         
-        /* ============================================
-           SIDEBAR MENU
-           ============================================ */
         .sidebar-menu { 
             list-style: none; 
             padding: 12px 0; 
@@ -176,9 +173,6 @@
             border-left-color: #3b82f6;
         }
         
-        /* ============================================
-           SIDEBAR FOOTER - USER MENU
-           ============================================ */
         .sidebar-footer {
             padding: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -342,9 +336,6 @@
             color: #991b1b !important;
         }
         
-        /* ============================================
-           MAIN CONTENT AREA
-           ============================================ */
         .content-area {
             grid-column: 2;
             display: flex;
@@ -353,9 +344,6 @@
             overflow: hidden;
         }
         
-        /* ============================================
-           TOPBAR
-           ============================================ */
         .admin-topbar { 
             background: white; 
             padding: 14px 24px; 
@@ -408,9 +396,6 @@
             color: #1f2937;
         }
         
-        /* ============================================
-           MAIN CONTENT
-           ============================================ */
         .admin-main { 
             flex: 1;
             padding: 20px 24px;
@@ -435,9 +420,6 @@
             background: #9ca3af;
         }
         
-        /* ============================================
-           LOADING STATE
-           ============================================ */
         .loading {
             text-align: center;
             padding: 60px 20px;
@@ -468,9 +450,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* ============================================
-           ERROR STATE
-           ============================================ */
         .error-container {
             background: #fee2e2;
             border: 1px solid #fecaca;
@@ -491,9 +470,6 @@
             font-size: 13px;
         }
         
-        /* ============================================
-           RESPONSIVE
-           ============================================ */
         @media (max-width: 1024px) {
             .admin-wrapper {
                 grid-template-columns: 200px 1fr;
@@ -556,11 +532,10 @@
             
             <ul class="sidebar-menu">
                 <li><button class="sidebar-menu-link active" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button></li>
-                <li><button class="sidebar-menu-link" data-page="staff"><i class="fas fa-users-cog"></i> Staff</button></li>
+                <li><button class="sidebar-menu-link" data-page="reservations"><i class="fas fa-calendar-check"></i> Reservations</button></li>
                 <li><button class="sidebar-menu-link" data-page="users"><i class="fas fa-user-tie"></i> Customers</button></li>
                 <li><button class="sidebar-menu-link" data-page="rooms"><i class="fas fa-door-open"></i> Rooms</button></li>
-                <li><button class="sidebar-menu-link" data-page="reservations"><i class="fas fa-calendar-check"></i> Reservations</button></li>
-                <li><button class="sidebar-menu-link" data-page="reports"><i class="fas fa-file-alt"></i> Reports</button></li>
+                <li><button class="sidebar-menu-link" data-page="staff"><i class="fas fa-users-cog"></i> Staff</button></li>
             </ul>
             
             <!-- ✅ USER MENU AT BOTTOM -->
@@ -581,15 +556,6 @@
                             <div class="sidebar-user-dropdown-role">Administrator</div>
                             <div class="sidebar-user-dropdown-email" id="sidebarUserDropdownEmail">admin@oceanview.com</div>
                         </div>
-                        
-                        <a href="#" class="sidebar-user-dropdown-item" data-page="profile">
-                            <i class="fas fa-user"></i> My Profile
-                        </a>
-                        <a href="#" class="sidebar-user-dropdown-item" data-page="settings">
-                            <i class="fas fa-cog"></i> Settings
-                        </a>
-                        
-                        <div class="sidebar-user-dropdown-divider"></div>
                         
                         <a href="#" class="sidebar-user-dropdown-item sidebar-user-dropdown-logout" onclick="adminLogout(event)">
                             <i class="fas fa-sign-out-alt"></i> Logout
@@ -629,29 +595,31 @@
 
     <!-- ✅ DASHBOARD SCRIPT -->
     <script>
+        console.log('🚀 Admin Dashboard Loading...');
+        console.log('Admin User: <%= firstName %> <%= lastName %>');
+        console.log('Email: <%= email %>');
+        
         class AdminDashboard {
             constructor() {
-                this.contextPath = '/OceanViewResort'; // ✅ SET YOUR PROJECT NAME HERE
                 this.titles = { 
                     dashboard: '📊 Dashboard', 
                     staff: '👔 Staff', 
                     users: '👥 Customers',
                     rooms: '🚪 Rooms', 
-                    reservations: '📅 Reservations', 
-                    reports: '📈 Reports' 
+                    reservations: '📅 Reservations'
                 };
                 this.adminUser = {
-                    name: '<%= firstName != null ? firstName + " " + lastName : "Admin" %>',
+                    name: '<%= firstName != null ? firstName + " " + lastName : "Admin" %>'.trim(),
                     username: '<%= username %>',
                     email: '<%= email != null ? email : "admin@oceanview.com" %>',
                     role: 'Administrator'
                 };
+                console.log('✅ Admin Dashboard initialized:', this.adminUser);
                 this.init();
             }
             
             init() {
                 console.log('🔧 Initializing Admin Dashboard...');
-                console.log('📍 Context Path:', this.contextPath);
                 this.setupUserInfo();
                 this.attachEventListeners();
                 this.loadPage('dashboard');
@@ -676,16 +644,6 @@
                         this.loadPage(page);
                     });
                 });
-                
-                document.querySelectorAll('.sidebar-user-dropdown-item').forEach(item => {
-                    item.addEventListener('click', (e) => {
-                        const page = item.dataset.page;
-                        if (page && page !== 'logout') {
-                            e.preventDefault();
-                            this.loadPage(page);
-                        }
-                    });
-                });
             }
             
             loadPage(page) {
@@ -697,7 +655,7 @@
                 
                 const titleText = this.titles[page] || page;
                 document.getElementById('pageTitle').textContent = titleText;
-                document.getElementById('pageBreadcrumb').textContent = 'Home / ' + titleText.replace(/[📊👔👥🚪📅📈]/g, '').trim();
+                document.getElementById('pageBreadcrumb').textContent = 'Home / ' + titleText.replace(/[📊👔👥🚪📅]/g, '').trim();
                 
                 document.getElementById('mainContent').innerHTML = `
                     <div class="loading">
@@ -706,20 +664,24 @@
                     </div>
                 `;
                 
-                // ✅ FIXED: Use absolute path with context root
-                const pageUrl = this.contextPath + '/admin-pages/' + page + '.jsp';
+                // ✅ CORRECT PATH - RELATIVE
+                const pageUrl = 'admin-pages/' + page + '.jsp';
                 console.log('📥 Fetching from:', pageUrl);
                 
                 fetch(pageUrl)
                     .then(r => {
                         console.log('📊 Response status:', r.status);
-                        if (!r.ok) throw new Error('HTTP ' + r.status + ' - Page not found at ' + pageUrl);
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
                         return r.text();
                     })
                     .then(html => {
                         console.log('✅ Page loaded successfully');
                         document.getElementById('mainContent').innerHTML = '<div class="page-content">' + html + '</div>';
-                        this.initPageScripts(page);
+                        
+                        // ✅ WAIT THEN CALL INIT
+                        setTimeout(() => {
+                            this.initPageScripts(page);
+                        }, 500);
                     })
                     .catch(e => {
                         console.error('❌ Error loading page:', e);
@@ -728,7 +690,6 @@
                                 <i class="fas fa-exclamation-circle"></i>
                                 <p><strong>Error loading ${page}</strong></p>
                                 <p>${e.message}</p>
-                                <p style="margin-top: 10px; font-size: 11px; color: #666;">URL: ${pageUrl}</p>
                             </div>
                         `;
                     });
@@ -737,24 +698,49 @@
             initPageScripts(page) {
                 console.log('🔧 Initializing scripts for:', page);
                 
-                if (page === 'dashboard' && typeof loadDashboardData === 'function') {
-                    setTimeout(() => loadDashboardData(), 100);
+                if (page === 'dashboard') {
+                    console.log('🎯 Calling initDashboardPage()');
+                    if (typeof initDashboardPage === 'function') {
+                        initDashboardPage();
+                    } else {
+                        console.warn('⚠️ initDashboardPage not found');
+                    }
                 }
                 
-                if (page === 'staff' && typeof initStaffPage === 'function') {
-                    setTimeout(() => initStaffPage(), 100);
+                if (page === 'reservations') {
+                    console.log('🎯 Calling initReservationsPage()');
+                    if (typeof initReservationsPage === 'function') {
+                        initReservationsPage();
+                    } else {
+                        console.warn('⚠️ initReservationsPage not found');
+                    }
                 }
                 
-                if (page === 'rooms' && typeof initRoomsPage === 'function') {
-                    setTimeout(() => initRoomsPage(), 100);
+                if (page === 'staff') {
+                    console.log('🎯 Calling initStaffPage()');
+                    if (typeof initStaffPage === 'function') {
+                        initStaffPage();
+                    } else {
+                        console.warn('⚠️ initStaffPage not found');
+                    }
                 }
                 
-                if (page === 'users' && typeof initUsersPage === 'function') {
-                    setTimeout(() => initUsersPage(), 100);
+                if (page === 'users') {
+                    console.log('🎯 Calling initUsersPage()');
+                    if (typeof initUsersPage === 'function') {
+                        initUsersPage();
+                    } else {
+                        console.warn('⚠️ initUsersPage not found');
+                    }
                 }
                 
-                if (page === 'reservations' && typeof initReservationsPage === 'function') {
-                    setTimeout(() => initReservationsPage(), 100);
+                if (page === 'rooms') {
+                    console.log('🎯 Calling initRoomsPage()');
+                    if (typeof initRoomsPage === 'function') {
+                        initRoomsPage();
+                    } else {
+                        console.warn('⚠️ initRoomsPage not found');
+                    }
                 }
             }
         }
@@ -787,6 +773,7 @@
         
         // ✅ START DASHBOARD WHEN DOM READY
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('✅ DOM Ready - Starting Admin Dashboard');
             new AdminDashboard();
         });
     </script>
