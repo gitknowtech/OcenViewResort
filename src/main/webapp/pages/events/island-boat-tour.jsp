@@ -12,7 +12,7 @@
         
         <div class="event-detail-container">
             <div class="event-hero">
-                <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Island Boat Tour" class="event-hero-image">
+                <img src="https://res.klook.com/image/upload/w_750,h_469,c_fill,q_85/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/weoh3czkxedy1x4hkrst.jpg" alt="Island Boat Tour" class="event-hero-image">
                 <div class="event-hero-overlay">
                     <h1>Tropical Island Adventure</h1>
                     <p>Explore pristine islands and hidden beaches</p>
@@ -135,22 +135,22 @@
                 <h3>Island Tour Gallery</h3>
                 <div class="gallery-grid">
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Tropical Island">
+                        <img src="https://media.tacdn.com/media/attractions-splice-spp-674x446/0d/a3/0d/ac.jpg" alt="Tropical Island">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Snorkeling">
+                        <img src="https://usctdlbfnoutyyggypeg.supabase.co/storage/v1/object/public/tour-images/jbhk-pl-003/1757773633726.jpg" alt="Snorkeling">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1583212292454-1fe6229603b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Boat Tour">
+                        <img src="https://cdn.getyourguide.com/image/format=auto,fit=crop,gravity=center,quality=60,width=450,height=450,dpr=2/tour_img/54e7a24e1be2c0325cb3f25a67c2ba068cc0ce81c41f6aa4030f78bb26d68b7d.jpg" alt="Boat Tour">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1535025639604-9a804c092faa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Crystal Waters">
+                        <img src="https://captainphillip.com/wp-content/uploads/2021/01/Liberty-Tour-Boat-1024x686.jpg" alt="Crystal Waters">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Beach Paradise">
+                        <img src="https://cdn.getyourguide.com/img/tour/b14fe0744645bc322a3189122bbb1b3edbd58823477a126c0bd5627cbd6abacd.jpeg/68.jpg" alt="Beach Paradise">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1591025207163-942350e47db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Sunset Views">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSj3qCpSuNJ6h8Pftwlk_I6k7d7x5JmRJ4rlQ&s" alt="Sunset Views">
                     </div>
                 </div>
             </div>
@@ -192,8 +192,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         participantCount.textContent = currentCount;
-        displayPriceElement.textContent = `LKR ${pricePerPerson.toLocaleString()}`;
-        totalPriceElement.textContent = `LKR ${totalPrice.toLocaleString()}`;
+        displayPriceElement.textContent = LKR ${pricePerPerson.toLocaleString()};
+        totalPriceElement.textContent = LKR ${totalPrice.toLocaleString()};
         
         decreaseBtn.disabled = currentCount <= minParticipants;
         increaseBtn.disabled = currentCount >= maxParticipants;

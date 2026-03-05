@@ -35,7 +35,7 @@
     .badge-maintenance { background: #fef3c7; color: #92400e; }
     .badge-non-maintenance { background: #dbeafe; color: #1e40af; }
     .badge-booked { background: #fecaca; color: #7f1d1d; }
-    .badge-non-booked { background: #c7d2fe; color: #3730a3; }
+    .badge-available { background: #c7d2fe; color: #3730a3; }
     @media (max-width: 1400px) { .container { grid-template-columns: 1fr; } }
 </style>
 
@@ -76,6 +76,9 @@
             <option value="Day">Day</option>
             <option value="Night">Night</option>
             <option value="Day-Night">Day-Night</option>
+            <option value="Standard">Standard</option>
+            <option value="Deluxe">Deluxe</option>
+            <option value="Suite">Suite</option>
         </select>
         
         <input type="number" id="capacity" placeholder="Capacity (Guests)" min="1" required>
@@ -94,10 +97,11 @@
             <option value="non-maintenance">Non-Maintenance</option>
         </select>
         
+        <!-- ✅ FIXED: Changed from 'non-booked' to 'available' -->
         <select id="booking_status" required>
             <option value="">Select Booking Status</option>
+            <option value="available">Available</option>
             <option value="booked">Booked</option>
-            <option value="non-booked">Non-Booked</option>
         </select>
         
         <textarea id="description" placeholder="Description" rows="3"></textarea>
@@ -108,3 +112,9 @@
         </div>
     </div>
 </div>
+
+<script src="js/rooms-manager.js"></script>
+<script>
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initRoomsPage);
+</script>

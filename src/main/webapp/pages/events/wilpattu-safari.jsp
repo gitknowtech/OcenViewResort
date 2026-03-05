@@ -12,7 +12,7 @@
         
         <div class="event-detail-container">
             <div class="event-hero">
-                <img src="https://images.unsplash.com/photo-1549366021-9f761d040a94?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Wilpattu Safari" class="event-hero-image">
+                <img src="https://lakpura.com/cdn/shop/files/wilpattu_safari.jpg?v=1698740637&width=3840" alt="Wilpattu Safari" class="event-hero-image">
                 <div class="event-hero-overlay">
                     <h1>Wilpattu Wildlife Safari</h1>
                     <p>Discover Sri Lanka's largest national park</p>
@@ -128,7 +128,7 @@
                 <h3>Safari Gallery</h3>
                 <div class="gallery-grid">
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1549366021-9f761d040a94?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Sri Lankan Leopard">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKQLKlLhHvPFDZWAoOx9ontWtIEAeD-7X4Pw&s" alt="Sri Lankan Leopard">
                     </div>
                     <div class="gallery-item">
                         <img src="https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Asian Elephant">
@@ -137,13 +137,13 @@
                         <img src="https://images.unsplash.com/photo-1551969014-7d2c4cddf0b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Safari Vehicle">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Wilpattu Landscape">
+                        <img src="https://www.srilankabirdwatchingtours.com/images/bird-watching-sites-in-sri-lanka/wilpattu-national-park/01.jpg" alt="Wilpattu Landscape">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1551969014-7d2c4cddf0b6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Water Buffalo">
+                        <img src="https://www.wilpattu.com/fgdata/Mammals/Sloth-Bear/dpp_352154_copy4.jpg" alt="Water Buffalo">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1549366021-9f761d040a94?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Bird Watching">
+                        <img src="https://i.pinimg.com/474x/30/c1/34/30c1346c427169a1f5076c35cb99740d.jpg" alt="Bird Watching">
                     </div>
                 </div>
             </div>
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalPrice = currentCount * pricePerPerson;
         
         participantCount.textContent = currentCount;
-        totalPriceElement.textContent = `LKR ${totalPrice.toLocaleString()}`;
+        totalPriceElement.textContent = LKR ${totalPrice.toLocaleString()};
         
         decreaseBtn.disabled = currentCount <= minParticipants;
         increaseBtn.disabled = currentCount >= maxParticipants;

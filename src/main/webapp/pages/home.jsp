@@ -6,19 +6,19 @@
     <div class="hero">
         <div class="hero-overlay"></div>
         <div class="hero-background">
-            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&q=80" alt="Ocean View Beach Resort">
+            <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/28/78/82/d0/ocean-view-house.jpg?w=900&h=500&s=1" alt="Ocean View Beach Resort Galle">
         </div>
         <div class="hero-content">
             <h1 class="hero-title">OCEAN VIEW BEACH RESORT</h1>
-            <h2 class="hero-subtitle">KALPITIYA - SRI LANKA</h2>
+            <h2 class="hero-subtitle">GALLE - SRI LANKA</h2>
             <p class="hero-description">
-                Experience paradise at Ocean View Beach Resort, where luxury meets adventure. Located on the pristine coastline of Kalpitiya, 
+                Experience paradise at Ocean View Beach Resort, where luxury meets adventure. Located on the pristine coastline of Galle, 
                 our resort offers 6 exclusive beachfront cabanas with breathtaking ocean views. Indulge in world-class amenities while 
-                enjoying thrilling water sports, wildlife safaris, and unforgettable experiences.
+                enjoying thrilling water sports, heritage tours, and unforgettable experiences.
             </p>
             <div class="hero-buttons">
-                <button class="cta-button primary" data-page="reservation">MAKE RESERVATION</button>
-                <button class="cta-button secondary" data-page="accommodation">VIEW PACKAGES</button>
+                <button class="cta-button primary" onclick="navigateTo('reservation')">MAKE RESERVATION</button>
+                <button class="cta-button secondary" onclick="navigateTo('accommodation')">VIEW PACKAGES</button>
             </div>
         </div>
     </div>
@@ -39,7 +39,7 @@
                 </div>
                 <div class="stat-item">
                     <i class="fas fa-umbrella-beach"></i>
-                    <h3>200m</h3>
+                    <h3>500m</h3>
                     <p>Beach Access</p>
                 </div>
                 <div class="stat-item">
@@ -55,66 +55,66 @@
     <div class="special-events">
         <div class="container">
             <h2 class="section-title">SPECIAL EVENTS & ADVENTURES</h2>
-            <p class="section-subtitle">Discover unforgettable experiences at Ocean View Beach Resort</p>
+            <p class="section-subtitle">Discover unforgettable experiences at Ocean View Beach Resort, Galle</p>
             
             <div class="events-grid">
-                <div class="event-card" data-event="wilpattu-safari">
-                    <img src="https://images.unsplash.com/photo-1549366021-9f761d040a94?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Wilpattu Safari">
+                <div class="event-card" data-event="galle-fort-tour" onclick="handleEventClick('galle-fort-tour')">
+                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Galle Fort Heritage Tour">
                     <div class="event-overlay">
-                        <h3>WILPATTU SAFARI</h3>
-                        <p>Experience Sri Lanka's largest national park with diverse wildlife including leopards, elephants, and exotic birds.</p>
-                        <button class="event-btn">EXPLORE SAFARI</button>
+                        <h3>GALLE FORT TOUR</h3>
+                        <p>Explore the UNESCO World Heritage Galle Fort with its historic ramparts, colonial architecture, and stunning coastal views.</p>
+                        <button class="event-btn" type="button">EXPLORE FORT</button>
                     </div>
                 </div>
 
-                <div class="event-card" data-event="kitesurfing">
-                    <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Kitesurfing">
+                <div class="event-card" data-event="surfing" onclick="handleEventClick('surfing')">
+                    <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Surfing in Galle">
                     <div class="event-overlay">
-                        <h3>KITESURFING</h3>
-                        <p>Ride the waves with world-class kitesurfing conditions. Perfect winds from April to October.</p>
-                        <button class="event-btn">LEARN MORE</button>
+                        <h3>SURFING LESSONS</h3>
+                        <p>Ride the waves at Galle's best surfing spots. Professional instructors available for all skill levels year-round.</p>
+                        <button class="event-btn" type="button">LEARN MORE</button>
                     </div>
                 </div>
 
-                <div class="event-card" data-event="whale-watching">
-                    <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Whale Watching">
+                <div class="event-card" data-event="whale-watching" onclick="handleEventClick('whale-watching')">
+                    <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Whale Watching Tours">
                     <div class="event-overlay">
                         <h3>WHALE WATCHING</h3>
                         <p>Witness majestic blue whales and sperm whales in their natural habitat. Best season: December to April.</p>
-                        <button class="event-btn">BOOK TOUR</button>
+                        <button class="event-btn" type="button">BOOK TOUR</button>
                     </div>
                 </div>
 
-                <div class="event-card" data-event="dolphin-watching">
-                    <img src="https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Dolphin Watching">
+                <div class="event-card" data-event="dolphin-watching" onclick="handleEventClick('dolphin-watching')">
+                    <img src="https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Dolphin Watching Experience">
                     <div class="event-overlay">
                         <h3>DOLPHIN WATCHING</h3>
-                        <p>Encounter playful dolphins in the crystal-clear waters. Daily tours available year-round.</p>
-                        <button class="event-btn">JOIN TOUR</button>
+                        <p>Encounter playful dolphins in the crystal-clear waters of Galle. Daily tours available year-round.</p>
+                        <button class="event-btn" type="button">JOIN TOUR</button>
                     </div>
                 </div>
 
-                <div class="event-card" data-event="island-boat-tour">
-                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Island Boat Tour">
+                <div class="event-card" data-event="sunset-cruise" onclick="handleEventClick('sunset-cruise')">
+                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Sunset Cruise">
                     <div class="event-overlay">
-                        <h3>ISLAND BOAT TOUR</h3>
-                        <p>Explore pristine islands, hidden lagoons, and mangrove forests on our exclusive boat tours.</p>
-                        <button class="event-btn">DISCOVER ISLANDS</button>
+                        <h3>SUNSET CRUISE</h3>
+                        <p>Experience magical sunsets from our exclusive boat cruises along the Galle coastline with refreshments included.</p>
+                        <button class="event-btn" type="button">BOOK CRUISE</button>
                     </div>
                 </div>
 
-                <div class="event-card" data-event="snorkeling">
-                    <img src="https://images.unsplash.com/photo-1583212292454-1fe6229603b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Snorkeling">
+                <div class="event-card" data-event="snorkeling" onclick="handleEventClick('snorkeling')">
+                    <img src="https://images.unsplash.com/photo-1583212292454-1fe6229603b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300&q=80" alt="Snorkeling Adventure">
                     <div class="event-overlay">
                         <h3>SNORKELING</h3>
-                        <p>Dive into underwater paradise with vibrant coral reefs and tropical marine life.</p>
-                        <button class="event-btn">DIVE IN</button>
+                        <p>Dive into underwater paradise with vibrant coral reefs and tropical marine life near Galle.</p>
+                        <button class="event-btn" type="button">DIVE IN</button>
                     </div>
                 </div>
             </div>
 
             <div class="view-all-events">
-                <button class="cta-button" data-page="events">VIEW ALL EVENTS</button>
+                <button class="cta-button" onclick="navigateTo('events')">VIEW ALL EVENTS</button>
             </div>
         </div>
     </div>
@@ -132,9 +132,9 @@
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
                     </div>
-                    <p>"Absolutely incredible experience! The kitesurfing was world-class and the staff was so welcoming. The beachfront cabana was perfect with stunning ocean views."</p>
+                    <p>"Absolutely incredible experience! The surfing lessons were world-class and the staff was so welcoming. The beachfront cabana was perfect with stunning ocean views of Galle."</p>
                     <div class="reviewer">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80" alt="John Smith">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80" alt="John Smith Guest Review">
                         <div class="reviewer-info">
                             <h4>John Smith</h4>
                             <p>United Kingdom</p>
@@ -150,9 +150,9 @@
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
                     </div>
-                    <p>"The whale watching tour was breathtaking! We saw blue whales up close. The resort's location is perfect for all water activities. Highly recommended!"</p>
+                    <p>"The Galle Fort tour was breathtaking! We explored the historic ramparts and colonial architecture. The resort's location is perfect for all water activities. Highly recommended!"</p>
                     <div class="reviewer">
-                        <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80" alt="Sarah Johnson">
+                        <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80" alt="Sarah Johnson Guest Review">
                         <div class="reviewer-info">
                             <h4>Sarah Johnson</h4>
                             <p>Australia</p>
@@ -168,9 +168,9 @@
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
                     </div>
-                    <p>"Wilpattu Safari was amazing! Saw leopards and elephants. The resort arranged everything perfectly. The food was delicious and authentic Sri Lankan cuisine."</p>
+                    <p>"The sunset cruise was amazing! Saw dolphins and whales. The resort arranged everything perfectly. The food was delicious and authentic Sri Lankan cuisine."</p>
                     <div class="reviewer">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80" alt="Michael Chen">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80" alt="Michael Chen Guest Review">
                         <div class="reviewer-info">
                             <h4>Michael Chen</h4>
                             <p>Singapore</p>
@@ -194,7 +194,7 @@
                 <div class="feature-item">
                     <i class="fas fa-swimming-pool"></i>
                     <h3>Infinity Pool</h3>
-                    <p>Stunning oceanfront infinity pool</p>
+                    <p>Stunning oceanfront infinity pool overlooking Galle Bay</p>
                 </div>
                 <div class="feature-item">
                     <i class="fas fa-utensils"></i>
@@ -209,7 +209,7 @@
                 <div class="feature-item">
                     <i class="fas fa-car"></i>
                     <h3>Airport Transfer</h3>
-                    <p>Complimentary pickup and drop-off service</p>
+                    <p>Complimentary pickup and drop-off service from Colombo</p>
                 </div>
                 <div class="feature-item">
                     <i class="fas fa-concierge-bell"></i>
@@ -223,27 +223,29 @@
     <!-- Location & Map -->
     <div class="location-section">
         <div class="container">
-            <h2 class="section-title">FIND US IN KALPITIYA</h2>
+            <h2 class="section-title">FIND US IN GALLE</h2>
             <div class="location-content">
                 <div class="location-info">
-                    <h3>Perfect Location</h3>
-                    <p>Located on the pristine coastline of Kalpitiya, our resort offers easy access to:</p>
+                    <h3>Perfect Location in Galle</h3>
+                    <p>Located on the pristine coastline of Galle, our resort offers easy access to:</p>
                     <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> 3 hours from Colombo International Airport</li>
-                        <li><i class="fas fa-map-marker-alt"></i> 15 minutes from Kalpitiya town center</li>
-                        <li><i class="fas fa-map-marker-alt"></i> Direct beach access</li>
+                        <li><i class="fas fa-map-marker-alt"></i> 2.5 hours from Colombo International Airport</li>
+                        <li><i class="fas fa-map-marker-alt"></i> 10 minutes from Galle Fort (UNESCO World Heritage Site)</li>
+                        <li><i class="fas fa-map-marker-alt"></i> 5 minutes from Galle town center</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Direct beach access to Galle Bay</li>
                         <li><i class="fas fa-map-marker-alt"></i> Close to all major attractions</li>
                     </ul>
-                    <button class="cta-button" data-page="contact">GET DIRECTIONS</button>
+                    <button class="cta-button" onclick="navigateTo('contact')">GET DIRECTIONS</button>
                 </div>
                 <div class="map-container">
                     <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3937.2858181234567!2d79.7644444!3d8.2333333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zOMKwMTMnNTkuOSJOIDc5wrA0NSc1Mi4wIkU!5e0!3m2!1sen!2slk!4v1234567890123"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.3693267890123!2d80.2211111!3d6.0535!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae18f5c5c5c5c5d%3A0x5c5c5c5c5c5c5c5c!2sGalle%20Fort!5e0!3m2!1sen!2slk!4v1234567890123"
                         width="100%" 
                         height="400" 
                         style="border:0; border-radius: 10px;" 
                         allowfullscreen="" 
-                        loading="lazy">
+                        loading="lazy"
+                        title="Ocean View Beach Resort Location in Galle">
                     </iframe>
                 </div>
             </div>
@@ -254,10 +256,10 @@
     <div class="final-cta">
         <div class="container">
             <h2>Ready for Your Dream Vacation?</h2>
-            <p>Book now and experience the magic of Ocean View Beach Resort</p>
+            <p>Book now and experience the magic of Ocean View Beach Resort in Galle</p>
             <div class="cta-buttons">
-                <button class="cta-button primary" data-page="reservation">BOOK NOW</button>
-                <button class="cta-button secondary" data-page="contact">CONTACT US</button>
+                <button class="cta-button primary" onclick="navigateTo('reservation')">BOOK NOW</button>
+                <button class="cta-button secondary" onclick="navigateTo('contact')">CONTACT US</button>
             </div>
         </div>
     </div>
@@ -679,26 +681,37 @@
 </style>
 
 <script>
-// Event card click handlers
-$(document).ready(function() {
-    $('.event-card').click(function() {
-        const eventType = $(this).data('event');
-        console.log('Event clicked:', eventType);
-        
-        // Load specific event page
-        loadPage('events/' + eventType);
-        updateNavigation('events');
-    });
-    
+// Navigation function
+function navigateTo(page) {
+    console.log('Navigating to:', page);
+    // Replace with your actual navigation logic
+    if (typeof loadPage === 'function') {
+        loadPage(page);
+    } else {
+        window.location.href = '?page=' + page;
+    }
+}
+
+// Event click handler
+function handleEventClick(eventType) {
+    console.log('Event clicked:', eventType);
+    navigateTo('events/' + eventType);
+}
+
+// Document ready
+document.addEventListener('DOMContentLoaded', function() {
     // Smooth scrolling for internal links
-    $('a[href^="#"]').click(function(e) {
-        e.preventDefault();
-        const target = $($(this).attr('href'));
-        if (target.length) {
-            $('html, body').animate({
-                scrollTop: target.offset().top - 80
-            }, 800);
-        }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
     });
 });
 </script>

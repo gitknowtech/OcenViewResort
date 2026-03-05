@@ -8,7 +8,13 @@ $(document).ready(function() {
     console.log("✅ jQuery ready");
     checkUserStatusOnLoad();
     
-    $(document).on('click', '.navbar-link, [data-page]:not(.signup-form [data-page])', function(e) {
+    // ✅ NAVBAR LINK CLICK HANDLERS
+    $(document).on('click', '.navbar-link, [data-page]', function(e) {
+        // Don't prevent default for external links
+        if ($(this).attr('href') && $(this).attr('href').startsWith('http')) {
+            return true;
+        }
+        
         e.preventDefault();
         const page = $(this).data('page');
         if (page && page.trim()) {
@@ -16,6 +22,7 @@ $(document).ready(function() {
         }
     });
     
+    // ✅ DROPDOWN LINK HANDLERS
     $(document).on('click', '.navbar-dropdown-link', function(e) {
         e.preventDefault();
         const page = $(this).data('page');
@@ -26,11 +33,13 @@ $(document).ready(function() {
         $('.navbar-hamburger').removeClass('active');
     });
     
+    // ✅ HAMBURGER MENU TOGGLE
     $(document).on('click', '.navbar-hamburger', function() {
         $(this).toggleClass('active');
         $('.navbar-menu').toggleClass('active');
     });
     
+    // ✅ CLOSE MENU ON LINK CLICK
     $(document).on('click', '.navbar-link', function() {
         $('.navbar-menu').removeClass('active');
         $('.navbar-hamburger').removeClass('active');
@@ -64,12 +73,9 @@ function checkUserStatusOnLoad() {
                 console.log('   - Type:', typeof data.user.isAdmin);
                 
                 // ✅✅✅ CHECK IF ADMIN OR STAFF - IMMEDIATE REDIRECT ✅✅✅
-                // Check both === true and == 1 for compatibility
                 if (data.user.isAdmin === true || data.user.isAdmin == 1 || data.user.isAdmin === 1) {
                     console.log('\n🔐🔐🔐 ADMIN/STAFF DETECTED 🔐🔐🔐');
                     console.log('   - isAdmin value:', data.user.isAdmin);
-                    console.log('   - isAdmin === true:', data.user.isAdmin === true);
-                    console.log('   - isAdmin == 1:', data.user.isAdmin == 1);
                     console.log('⏰ REDIRECTING TO admin-dashboard.jsp NOW...\n');
                     
                     isAdminLoggedIn = true;
@@ -79,24 +85,15 @@ function checkUserStatusOnLoad() {
                     
                     // ✅ MULTIPLE REDIRECT METHODS FOR RELIABILITY
                     console.log('🔄 Attempting redirect...');
-                    
-                    // Method 1: Direct window.location
                     window.location.href = 'admin-dashboard.jsp';
                     
-                    // Method 2: Backup with replace
                     setTimeout(() => {
                         window.location.replace('admin-dashboard.jsp');
                     }, 100);
                     
-                    // Method 3: Top location
-                    setTimeout(() => {
-                        window.top.location = 'admin-dashboard.jsp';
-                    }, 200);
-                    
-                    return; // STOP ALL CODE EXECUTION
+                    return;
                 } else {
                     console.log('\n👤 REGULAR USER DETECTED');
-                    console.log('   - isAdmin value:', data.user.isAdmin);
                     console.log('📝 Updating navbar and loading home page...\n');
                     
                     updateNavbarForLoggedInUser(data.user);
@@ -114,35 +111,11 @@ function checkUserStatusOnLoad() {
             console.error('❌ Error checking user status:');
             console.error('   - Status:', status);
             console.error('   - Error:', error);
-            console.error('   - Response:', xhr.responseText);
             
             updateNavbarForLoggedOutUser();
             loadPage('home');
         }
     });
-}
-
-// ✅ UPDATE NAVBAR FOR ADMIN USER
-function updateNavbarForAdminUser(user) {
-    console.log('🔐 Updating navbar for admin user:', user);
-    
-    const displayName = user.firstName || user.username || 'Admin';
-    const username = user.username || 'admin';
-    
-    $('#navbarLoginSection').removeClass('logged-out').addClass('logged-in');
-    $('#navbarUserAvatar').text(displayName.charAt(0).toUpperCase());
-    $('#navbarUserName').text(displayName);
-    $('#navbarUserUsername').text('@' + username);
-    $('#navbarUserEmail').text(user.email || 'admin@oceanview.lk');
-    
-    $('#navbarUserDropdownName').text(displayName);
-    $('#navbarUserDropdownUsername').text('@' + username);
-    $('#navbarUserDropdownEmail').text(user.email || 'admin@oceanview.lk');
-    
-    // Add admin indicator
-    $('#navbarUserRole').html('<span style="color: #ef4444; font-weight: bold;">🔐 ADMIN</span>');
-    
-    console.log('✅ Admin navbar updated');
 }
 
 // ✅ UPDATE NAVBAR FOR REGULAR LOGGED IN USER
@@ -164,6 +137,10 @@ function updateNavbarForLoggedInUser(user) {
     $('#navbarUserDropdownUsername').text('@' + username);
     $('#navbarUserDropdownEmail').text(user.email);
     
+    // ✅ MAKE GLOBAL CURRENT USER AVAILABLE
+    window.currentUser = user;
+    window.currentNavbarUser = user;
+    
     console.log('✅ User navbar updated');
 }
 
@@ -175,6 +152,8 @@ function updateNavbarForLoggedOutUser() {
     isUserLoggedIn = false;
     isAdminLoggedIn = false;
     currentUser = null;
+    window.currentUser = null;
+    window.currentNavbarUser = null;
 }
 
 // ✅ LOGOUT FUNCTION
@@ -192,7 +171,6 @@ window.logoutUser = function() {
             updateNavbarForLoggedOutUser();
             showMessage('👋 Logged out successfully', 'info');
             
-            // Redirect to home
             setTimeout(() => {
                 window.location.href = 'index.jsp';
             }, 1000);
@@ -204,38 +182,7 @@ window.logoutUser = function() {
     });
 };
 
-// ✅ ADMIN LOGOUT FUNCTION
-window.adminLogout = function(event) {
-    if (event) {
-        event.preventDefault();
-    }
-    
-    if (!confirm('Are you sure you want to logout from admin panel?')) return;
-    
-    console.log('👋 Admin logging out...');
-    
-    $.ajax({
-        url: 'logout',
-        type: 'POST',
-        dataType: 'json',
-        success: function(data) {
-            console.log('✅ Admin logout successful:', data);
-            
-            // Clear admin session
-            isAdminLoggedIn = false;
-            currentUser = null;
-            
-            // Redirect to login
-            window.location.replace('index.jsp');
-        },
-        error: function(error) {
-            console.error('❌ Admin logout error:', error);
-            window.location.replace('index.jsp');
-        }
-    });
-};
-
-// ✅ MAIN LOAD FUNCTION - NO VALIDATION
+// ✅ MAIN LOAD FUNCTION
 function loadPage(pageName) {
     console.log("📄 Loading page:", pageName);
     
@@ -328,14 +275,23 @@ function initPageFunctions(pageName, fullPageName) {
         case 'contact':
             initContactFunctions();
             break;
-        case 'reservation':
-            initReservationFunctions();
+        case 'bookings':
+            initBookingsFunctions();
+            break;
+        case 'booking-view':
+            initBookingViewFunctions();
             break;
         case 'profile':
             initProfileFunctions();
             break;
         case 'login':
             initLoginPageFunctions();
+            break;
+        case 'settings':
+            initSettingsFunctions();
+            break;
+        case 'help':
+            initHelpFunctions();
             break;
         default:
             console.log("⚠️ No init function for:", pageName);
@@ -381,7 +337,6 @@ function initAccommodationFunctions() {
     $(document).off('click.accommodation').on('click.accommodation', '.book-btn', function(e) {
         e.preventDefault();
         
-        // Check if user is logged in
         if (!isUserLoggedIn && !isAdminLoggedIn) {
             console.log('⚠️ User not logged in, redirecting to login');
             showMessage('Please login to make a booking', 'warning');
@@ -392,7 +347,7 @@ function initAccommodationFunctions() {
         }
         
         console.log('📦 Book button clicked');
-        loadPage('reservation');
+        loadPage('booking');
     });
 }
 
@@ -403,7 +358,6 @@ function initEventsFunctions(fullPageName) {
     $(document).off('click.events').on('click.events', '.event-book-btn', function(e) {
         e.preventDefault();
         
-        // Check if user is logged in
         if (!isUserLoggedIn && !isAdminLoggedIn) {
             console.log('⚠️ User not logged in, redirecting to login');
             showMessage('Please login to book an event', 'warning');
@@ -414,37 +368,35 @@ function initEventsFunctions(fullPageName) {
         }
         
         console.log('🎫 Event book button clicked');
-        loadPage('reservation');
+        loadPage('bookings');
     });
 }
 
 // ✅ GALLERY PAGE FUNCTIONS
 function initGalleryFunctions() {
     console.log("🖼️ Gallery initialized");
-    
-    $(document).off('click.gallery').on('click.gallery', '.gallery-item', function(e) {
-        e.preventDefault();
-        console.log('📸 Gallery item clicked');
-    });
 }
 
 // ✅ CONTACT PAGE FUNCTIONS
 function initContactFunctions() {
     console.log("📞 Contact initialized");
-    
-    $(document).off('submit.contact').on('submit.contact', '.contact-form', function(e) {
-        e.preventDefault();
-        console.log('📧 Contact form submitted');
-    });
 }
 
-// ✅ RESERVATION PAGE FUNCTIONS
-function initReservationFunctions() {
-    console.log("📅 Reservation initialized");
+// ✅ NEW BOOKING PAGE FUNCTIONS
+function initBookingsFunctions() {
+    console.log("🏨 New booking page initialized");
     
-    // Reservation page has its own script
-    if (typeof initializeReservationPage === 'function') {
-        initializeReservationPage();
+    if (typeof initializeBookingPage === 'function') {
+        initializeBookingPage();
+    }
+}
+
+// ✅ MY BOOKINGS VIEW PAGE FUNCTIONS
+function initBookingViewFunctions() {
+    console.log("📅 My bookings view page initialized");
+    
+    if (typeof initializeBookingView === 'function') {
+        initializeBookingView();
     }
 }
 
@@ -452,31 +404,31 @@ function initReservationFunctions() {
 function initProfileFunctions() {
     console.log("👤 Profile page initialized");
     
-    $(document).off('click.profile').on('click.profile', '.edit-profile-btn', function(e) {
-        e.preventDefault();
-        console.log('✏️ Edit profile clicked');
-    });
+    if (typeof initializeProfilePage === 'function') {
+        initializeProfilePage();
+    }
 }
 
 // ✅ LOGIN PAGE FUNCTIONS
 function initLoginPageFunctions() {
     console.log("🔐 Login page initialized");
-    
-    // Login page has its own script
-    if (typeof checkLoginPageUserStatus === 'function') {
-        checkLoginPageUserStatus();
-    }
+}
+
+// ✅ SETTINGS PAGE FUNCTIONS
+function initSettingsFunctions() {
+    console.log("⚙️ Settings page initialized");
+}
+
+// ✅ HELP PAGE FUNCTIONS
+function initHelpFunctions() {
+    console.log("❓ Help page initialized");
 }
 
 // ✅ EXPORT GLOBAL FUNCTIONS
 window.loadPage = loadPage;
 window.updateNavbarForLoggedInUser = updateNavbarForLoggedInUser;
-window.updateNavbarForAdminUser = updateNavbarForAdminUser;
 window.updateNavbarForLoggedOutUser = updateNavbarForLoggedOutUser;
 window.showMessage = showMessage;
 window.checkUserStatusOnLoad = checkUserStatusOnLoad;
-window.isUserLoggedIn = isUserLoggedIn;
-window.isAdminLoggedIn = isAdminLoggedIn;
-window.currentUser = currentUser;
 
-console.log("✅ main.js fully loaded with admin/staff redirect support!\n");
+console.log("✅ main.js fully loaded!\n");

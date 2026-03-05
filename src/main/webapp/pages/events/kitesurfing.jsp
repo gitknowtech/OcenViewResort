@@ -124,16 +124,16 @@
                 <h3>Experience Gallery</h3>
                 <div class="gallery-grid">
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Kitesurfing Action">
+                        <img src="https://img.freepik.com/free-photo/person-surfing-flying-parachute-same-time-kitesurfing-bonaire-caribbean_181624-11389.jpg" alt="Kitesurfing Action">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Kite Setup">
+                        <img src="https://lirp.cdn-website.com/0c81bee3/dms3rep/multi/opt/FXBKS_240411-31-590caabf-fc4aa8d4-c43e5d00-640w.jpg" alt="Kite Setup">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Kitesurfing Lesson">
+                        <img src="https://www.machutravelperu.com/wp-content/uploads/2025/06/kitesurfing-peru-beaches-1.webp" alt="Kitesurfing Lesson">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Beach Training">
+                        <img src="https://www.surfersisland.net/cdn/shop/articles/top-10-kitesurfing-tips-every-beginner-should-know-4556413_1024x1024.jpg?v=1752661734" alt="Beach Training">
                     </div>
                 </div>
             </div>
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateDisplay() {
         participantCount.textContent = currentCount;
         const totalPrice = currentCount * pricePerPerson;
-        totalPriceElement.textContent = `LKR ${totalPrice.toLocaleString()}`;
+        totalPriceElement.textContent = LKR ${totalPrice.toLocaleString()};
         
         decreaseBtn.disabled = currentCount <= minParticipants;
         increaseBtn.disabled = currentCount >= maxParticipants;

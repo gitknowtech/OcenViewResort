@@ -12,7 +12,7 @@
         
         <div class="event-detail-container">
             <div class="event-hero">
-                <img src="https://images.unsplash.com/photo-1591025207163-942350e47db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Dolphin Watching" class="event-hero-image">
+                <img src="https://news.cgtn.com/news/3d3d514f346b6a4e34457a6333566d54/img/64277c0af7cd4b9a8b45e0a6a28cfb58/64277c0af7cd4b9a8b45e0a6a28cfb58.jpg" alt="Dolphin Watching" class="event-hero-image">
                 <div class="event-hero-overlay">
                     <h1>Dolphin Encounters</h1>
                     <p>Meet playful dolphins in their natural habitat</p>
@@ -116,16 +116,16 @@
                 <h3>Experience Gallery</h3>
                 <div class="gallery-grid">
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1591025207163-942350e47db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Dolphins Playing">
+                        <img src="https://images.fineartamerica.com/images/artworkimages/mediumlarge/2/dolphins-playing-luca-da-ros.jpg" alt="Dolphins Playing">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1583212292454-1fe6229603b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Dolphin Watching Boat">
+                        <img src="https://www.dolphins-world.com/wp-content/uploads/Dolphins-Playing_p1.jpg" alt="Dolphin Watching Boat">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Ocean Adventure">
+                        <img src="https://www.scubadiving.com/sites/default/files/styles/655_1x_webp/public/scuba/images/2020/12/sunburst-dolphins-alex-mustard.jpg.webp?itok=2eb9ilaB" alt="Ocean Adventure">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1535025639604-9a804c092faa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Marine Life">
+                        <img src="https://media.istockphoto.com/id/513883558/photo/two-dolphins-playing-volleyball-in-the-pool.jpg?s=612x612&w=0&k=20&c=Mq9LtcqbcO73sAnAJLiw-qQiEheijIaBBYX2wKZgtsM=" alt="Marine Life">
                     </div>
                 </div>
             </div>
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateDisplay() {
         participantCount.textContent = currentCount;
         const totalPrice = currentCount * pricePerPerson;
-        totalPriceElement.textContent = `LKR ${totalPrice.toLocaleString()}`;
+        totalPriceElement.textContent = LKR ${totalPrice.toLocaleString()};
         
         decreaseBtn.disabled = currentCount <= minParticipants;
         increaseBtn.disabled = currentCount >= maxParticipants;

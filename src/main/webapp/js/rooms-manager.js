@@ -31,7 +31,7 @@ function loadRooms() {
                     html += '<td>' + room.room_number + '</td>';
                     html += '<td>' + room.room_type + '</td>';
                     html += '<td>' + room.capacity + '</td>';
-                    html += '<td>' + room.room_price.toFixed(2) + '</td>';
+                    html += '<td>LKR ' + room.room_price.toFixed(2) + '</td>';
                     html += '<td><span class="badge badge-' + room.status + '">' + room.status.toUpperCase() + '</span></td>';
                     html += '<td><span class="badge badge-' + room.maintenance + '">' + room.maintenance.toUpperCase() + '</span></td>';
                     html += '<td><span class="badge badge-' + room.booking_status + '">' + room.booking_status.toUpperCase() + '</span></td>';
@@ -63,7 +63,7 @@ function viewRoom(id) {
         .then(d => {
             if (d.success) {
                 const room = d.room;
-                alert('🚪 ROOM DETAILS\n\nID: ' + room.id + '\nRoom #: ' + room.room_number + '\nType: ' + room.room_type + '\nCapacity: ' + room.capacity + '\nPrice: $' + room.room_price + '\nStatus: ' + room.status + '\nMaintenance: ' + room.maintenance + '\nBooking: ' + room.booking_status + '\nDescription: ' + (room.description || 'N/A'));
+                alert('🚪 ROOM DETAILS\n\nID: ' + room.id + '\nRoom #: ' + room.room_number + '\nType: ' + room.room_type + '\nCapacity: ' + room.capacity + ' Guests\nPrice: LKR ' + room.room_price.toFixed(2) + '\nStatus: ' + room.status + '\nMaintenance: ' + room.maintenance + '\nBooking: ' + room.booking_status + '\nDescription: ' + (room.description || 'N/A'));
             } else {
                 showRoomsMsg('❌ Error loading room', 'error');
             }
@@ -154,8 +154,15 @@ function submitRoomForm() {
     
     console.log('📝 Submitting form:', { mode, room_number, room_type, capacity, room_price, status, maintenance, booking_status });
     
+    // ✅ VALIDATION
     if (!room_number || !room_type || !capacity || !room_price || !status || !maintenance || !booking_status) {
         showRoomsMsg('❌ All fields required', 'error');
+        return;
+    }
+    
+    // ✅ VALIDATE booking_status
+    if (booking_status !== 'available' && booking_status !== 'booked') {
+        showRoomsMsg('❌ Invalid booking status. Must be "available" or "booked"', 'error');
         return;
     }
     
@@ -173,6 +180,7 @@ function submitRoomForm() {
     
     const url = ROOMS_BASE_URL + ROOMS_CONTEXT_PATH + '/rooms';
     console.log('📤 Sending to:', url);
+    console.log('📋 Data:', params.toString());
     
     fetch(url, { 
         method: 'POST',
@@ -211,7 +219,7 @@ function resetRoomForm() {
     document.getElementById('room_price').value = '';
     document.getElementById('status').value = 'active';
     document.getElementById('maintenance').value = 'non-maintenance';
-    document.getElementById('booking_status').value = 'non-booked';
+    document.getElementById('booking_status').value = 'available';  // ✅ CHANGED from 'non-booked'
     document.getElementById('description').value = '';
     document.getElementById('formTitle').textContent = '➕ Add Room';
     document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Add Room';
@@ -241,3 +249,6 @@ function initRoomsPage() {
     console.log('✅ Rooms page initialized');
     loadRooms();
 }
+
+// ✅ Initialize when page loads
+document.addEventListener('DOMContentLoaded', initRoomsPage);

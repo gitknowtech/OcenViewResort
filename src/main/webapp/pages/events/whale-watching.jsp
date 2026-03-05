@@ -12,7 +12,7 @@
         
         <div class="event-detail-container">
             <div class="event-hero">
-                <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Whale Watching" class="event-hero-image">
+                <img src="https://awionline.org/sites/default/files/styles/art/public/page/image/whalewatching_flickr_Wade%20Tregaskis.jpg?itok=snS1WH8p" alt="Whale Watching" class="event-hero-image">
                 <div class="event-hero-overlay">
                     <h1>Blue Whale Watching</h1>
                     <p>Witness the majestic giants of the ocean</p>
@@ -112,16 +112,16 @@
                 <h3>Experience Gallery</h3>
                 <div class="gallery-grid">
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Blue Whale">
+                        <img src="https://www.flyingflagsavilabeach.com/wp-content/uploads/2022/03/iStock-1349821812.jpg" alt="Blue Whale">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1583212292454-1fe6229603b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Whale Watching Boat">
+                        <img src="https://media-cdn.tripadvisor.com/media/attractions-splice-spp-674x446/10/07/96/1c.jpg" alt="Whale Watching Boat">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1591025207163-942350e47db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Dolphins">
+                        <img src="https://cdn.getyourguide.com/image/format=auto,fit=crop,gravity=center,quality=60,width=450,height=450,dpr=2/tour_img/5e155e007307c.png" alt="Dolphins">
                     </div>
                     <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1535025639604-9a804c092faa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Ocean Adventure">
+                        <img src="https://barefootwhalewatchingsydney.com.au/wp-content/uploads/2025/07/Barefoot-Whale-Watching-Sydney-Harbour-Breaching-Whale.jpg" alt="Ocean Adventure">
                     </div>
                 </div>
             </div>
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateDisplay() {
         participantCount.textContent = currentCount;
         const totalPrice = currentCount * pricePerPerson;
-        totalPriceElement.textContent = `LKR ${totalPrice.toLocaleString()}`;
+        totalPriceElement.textContent = LKR ${totalPrice.toLocaleString()};
         
         decreaseBtn.disabled = currentCount <= minParticipants;
         increaseBtn.disabled = currentCount >= maxParticipants;

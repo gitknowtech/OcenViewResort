@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateDisplay() {
         participantCount.textContent = currentCount;
         const totalPrice = currentCount * pricePerPerson;
-        totalPriceElement.textContent = `LKR ${totalPrice.toLocaleString()}`;
+        totalPriceElement.textContent = LKR ${totalPrice.toLocaleString()};
         
         decreaseBtn.disabled = currentCount <= minParticipants;
         increaseBtn.disabled = currentCount >= maxParticipants;

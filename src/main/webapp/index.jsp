@@ -247,6 +247,7 @@
             transition: all 0.2s ease;
             font-size: 13px;
             border-bottom: 1px solid #f8f9fa;
+            cursor: pointer;
         }
         
         .navbar-user-dropdown-item:hover {
@@ -502,13 +503,14 @@
                                 <div class="navbar-user-dropdown-email" id="navbarUserDropdownEmail">user@example.com</div>
                             </div>
                             
+                            <!-- ✅ UPDATED LINKS -->
                             <a href="#" class="navbar-user-dropdown-item" data-page="profile">
                                 <i class="fas fa-user"></i> My Profile
                             </a>
-                            <a href="#" class="navbar-user-dropdown-item" data-page="bookings">
+                            <a href="#" class="navbar-user-dropdown-item" data-page="booking-view">
                                 <i class="fas fa-calendar-alt"></i> My Bookings
                             </a>
-                            <a href="#" class="navbar-user-dropdown-item" data-page="reservation">
+                            <a href="#" class="navbar-user-dropdown-item" data-page="bookings">
                                 <i class="fas fa-plus-circle"></i> New Booking
                             </a>
                             
@@ -523,15 +525,16 @@
                             
                             <div class="navbar-user-dropdown-divider"></div>
                             
-                            <a href="#" class="navbar-user-dropdown-item navbar-user-dropdown-logout" onclick="logoutUser()" id="navbarLogoutBtn">
+                            <a href="#" class="navbar-user-dropdown-item navbar-user-dropdown-logout" onclick="logoutUser()">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a>
                         </div>
                     </div>
                 </li>
                 
+                <!-- ✅ UPDATED BOOK NOW BUTTON -->
                 <li class="navbar-item">
-                    <a href="#" class="navbar-link navbar-btn-book" data-page="reservation">BOOK NOW</a>
+                   <a href="#" class="navbar-link navbar-btn-book" data-page="bookings">BOOK NOW</a>
                 </li>
             </ul>
             
@@ -626,7 +629,6 @@
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
                             </form>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -650,184 +652,5 @@
     <!-- Scripts -->
     <script src="js/navbar-scroll.js"></script>
     <script src="js/main.js"></script>
-    
-    <!-- USER AUTHENTICATION SCRIPT - UPDATED WITH USERNAME -->
-    <script>
-        console.log('🚀 Navbar user authentication loaded - USERNAME VERSION');
-        
-        // Global user state
-        let currentNavbarUser = null;
-        
-        // Check user status on page load
-        function checkNavbarUserStatus() {
-            console.log('🔍 Checking navbar user status...');
-            
-            fetch('checkUser')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('📊 Navbar user status:', data);
-                    
-                    if (data.loggedIn) {
-                        currentNavbarUser = data.user;
-                        showNavbarLoggedInState(data.user, data.autoLogin);
-                    } else {
-                        showNavbarLoggedOutState();
-                    }
-                })
-                .catch(error => {
-                    console.error('❌ Error checking navbar user status:', error);
-                    showNavbarLoggedOutState();
-                });
-        }
-        
-        // Show logged in state in navbar - UPDATED WITH USERNAME
-        function showNavbarLoggedInState(user, autoLogin = false) {
-            console.log('✅ Showing navbar logged in state for:', user);
-            
-            const loginSection = document.getElementById('navbarLoginSection');
-            const userAvatar = document.getElementById('navbarUserAvatar');
-            const userName = document.getElementById('navbarUserName');
-            const userUsername = document.getElementById('navbarUserUsername');
-            const userEmail = document.getElementById('navbarUserEmail');
-            const dropdownName = document.getElementById('navbarUserDropdownName');
-            const dropdownUsername = document.getElementById('navbarUserDropdownUsername');
-            const dropdownEmail = document.getElementById('navbarUserDropdownEmail');
-            
-            // Switch to logged in state
-            loginSection.className = 'navbar-item navbar-login-section logged-in';
-            
-            // Prepare user info
-            const firstName = user.firstName && user.firstName !== 'User' ? user.firstName : '';
-            const lastName = user.lastName && user.lastName !== 'Name' ? user.lastName : '';
-            const fullName = firstName && lastName ? `${firstName} ${lastName}` : 
-                            firstName ? firstName : 
-                            lastName ? lastName : 
-                            user.username || user.email.split('@')[0];
-            
-            const username = user.username || 'user';
-            const email = user.email || '';
-            const firstLetter = (fullName || username).charAt(0).toUpperCase();
-            
-            // Update navbar toggle
-            if (userAvatar) userAvatar.textContent = firstLetter;
-            if (userName) userName.textContent = fullName;
-            if (userUsername) userUsername.textContent = '@' + username;
-            if (userEmail) userEmail.textContent = email;
-            
-            // Update dropdown
-            if (dropdownName) dropdownName.textContent = fullName;
-            if (dropdownUsername) dropdownUsername.textContent = '@' + username;
-            if (dropdownEmail) dropdownEmail.textContent = email;
-            
-            console.log('✅ Navbar updated for user:', {
-                fullName: fullName,
-                username: username,
-                email: email
-            });
-            
-            // Show welcome message for auto login
-            if (autoLogin && typeof showMessage === 'function') {
-                showMessage(`🎉 Welcome back, ${fullName}! Auto-logged in.`, 'info');
-            }
-        }
-        
-        // Show logged out state in navbar
-        function showNavbarLoggedOutState() {
-            console.log('📝 Showing navbar logged out state');
-            
-            const loginSection = document.getElementById('navbarLoginSection');
-            loginSection.className = 'navbar-item navbar-login-section logged-out';
-            
-            currentNavbarUser = null;
-        }
-        
-        // Logout function
-        function logoutUser() {
-            if (!confirm('Are you sure you want to logout?')) return;
-            
-            console.log('👋 Logging out user...');
-            
-            fetch('logout', {
-                method: 'POST'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('✅ Logout successful');
-                    showNavbarLoggedOutState();
-                    
-                    // Show success message if function exists
-                    if (typeof showMessage === 'function') {
-                        showMessage('👋 Logged out successfully', 'info');
-                    }
-                    
-                    // Redirect to home page
-                    if (typeof loadPage === 'function') {
-                        loadPage('home');
-                    }
-                } else {
-                    console.error('❌ Logout failed:', data.message);
-                    if (typeof showMessage === 'function') {
-                        showMessage('❌ Error during logout', 'error');
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('❌ Logout error:', error);
-                if (typeof showMessage === 'function') {
-                    showMessage('⚠️ Network error during logout', 'error');
-                }
-            });
-        }
-        
-        // Global functions for other pages to update navbar
-        window.updateNavbarForLoggedInUser = function(user) {
-            console.log('🔄 Updating navbar for logged in user:', user);
-            showNavbarLoggedInState(user);
-        };
-        
-        window.updateNavbarForLoggedOutUser = function() {
-            console.log('🔄 Updating navbar for logged out user');
-            showNavbarLoggedOutState();
-        };
-        
-        // Legacy function names for compatibility
-        window.updateNavbarAfterLogin = function(user) {
-            console.log('🔄 Legacy: Updating navbar after login:', user);
-            showNavbarLoggedInState(user);
-        };
-        
-        window.updateNavbarAfterLogout = function() {
-            console.log('🔄 Legacy: Updating navbar after logout');
-            showNavbarLoggedOutState();
-        };
-        
-        // Check user status when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Small delay to ensure other scripts are loaded
-            setTimeout(checkNavbarUserStatus, 500);
-        });
-        
-        // Also check when page becomes visible (for browser back/forward)
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                setTimeout(checkNavbarUserStatus, 200);
-            }
-        });
-        
-        // Enhanced user authentication script
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Index.js: Enhanced navbar user authentication loaded - USERNAME VERSION');
-            
-            // Check user status when page loads
-            setTimeout(function() {
-                if (typeof checkMainUserStatus === 'function') {
-                    checkMainUserStatus();
-                } else {
-                    checkNavbarUserStatus();
-                }
-            }, 200);
-        });
-    </script>
 </body>
 </html>
