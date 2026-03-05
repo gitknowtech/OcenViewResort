@@ -7,8 +7,8 @@ $(document).ready(function() {
     console.log("Loading home page...");
     loadPage('home');
     
-    // Navigation click handler - FIXED: Use correct navbar classes
-    $(document).on('click', '.navbar-link, [data-page]', function(e) {
+    // Navigation click handler - EXCLUDE signup form links to prevent redirect
+    $(document).on('click', '.navbar-link, [data-page]:not(.signup-form [data-page]):not(.signup-form a[data-page])', function(e) {
         e.preventDefault();
         const page = $(this).data('page') || $(this).attr('data-page');
         console.log("Navigation clicked, page:", page);
@@ -217,9 +217,21 @@ function initPageFunctions(pageName, fullPageName) {
     }
 }
 
-// ADD: Login page functions
+// ADD: Login page functions - UPDATED to handle signup forms
 function initLoginFunctions() {
     console.log("Initializing login page functions");
+    
+    // Handle signup form login links separately (prevent main navigation interference)
+    $(document).off('click.signup-login').on('click.signup-login', '.signup-form [data-page], .signup-form a[data-page]', function(e) {
+        e.preventDefault();
+        e.stopPropagation(); // Prevent main navigation handler
+        const page = $(this).data('page') || $(this).attr('data-page');
+        console.log("Signup form login link clicked, page:", page);
+        if (page) {
+            loadPage(page);
+            updateNavigation(page.split('/')[0]);
+        }
+    });
     
     // Password toggle functionality
     $(document).off('click.login-toggle').on('click.login-toggle', '#toggle-password', function() {

@@ -18,7 +18,7 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
-    <!-- Navbar Spacing Fix -->
+    <!-- Navbar Spacing Fix + User Menu Styles -->
     <style>
         /* ============================================
            NAVBAR SPACING FIX - Prevent content overlap
@@ -98,6 +98,204 @@
         /* Fix for any modals or overlays */
         .modal, .overlay, .lightbox {
             z-index: 1050;
+        }
+        
+        /* ============================================
+           USER MENU STYLES - NEW
+           ============================================ */
+        
+        /* User menu dropdown */
+        .navbar-user-menu {
+            position: relative;
+        }
+        
+        .navbar-user-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 8px 15px;
+            color: white !important;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .navbar-user-toggle:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .navbar-user-avatar {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .navbar-user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .navbar-user-name {
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1;
+        }
+        
+        .navbar-user-email {
+            font-size: 10px;
+            opacity: 0.8;
+            line-height: 1;
+            margin-top: 2px;
+        }
+        
+        .navbar-user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            padding: 12px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border: 1px solid #e9ecef;
+            margin-top: 8px;
+        }
+        
+        .navbar-user-menu:hover .navbar-user-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .navbar-user-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-bottom: none;
+            border-right: none;
+            transform: rotate(45deg);
+        }
+        
+        .navbar-user-dropdown-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f3f4;
+            margin-bottom: 8px;
+        }
+        
+        .navbar-user-dropdown-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .navbar-user-dropdown-email {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .navbar-user-dropdown-item {
+            display: block;
+            padding: 10px 20px;
+            color: #555;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .navbar-user-dropdown-item:hover {
+            background: #f8f9fa;
+            color: #007bff;
+            padding-left: 24px;
+        }
+        
+        .navbar-user-dropdown-item i {
+            width: 16px;
+            margin-right: 8px;
+            text-align: center;
+        }
+        
+        .navbar-user-dropdown-divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 8px 0;
+        }
+        
+        .navbar-user-dropdown-logout {
+            color: #dc3545 !important;
+            font-weight: 500;
+        }
+        
+        .navbar-user-dropdown-logout:hover {
+            background: #f8d7da !important;
+            color: #721c24 !important;
+        }
+        
+        /* Hide login button when user is logged in */
+        .navbar-login-section.logged-in .navbar-btn-login {
+            display: none;
+        }
+        
+        .navbar-login-section.logged-out .navbar-user-menu {
+            display: none;
+        }
+        
+        /* ============================================
+           RESPONSIVE USER MENU
+           ============================================ */
+        
+        @media (max-width: 768px) {
+            .navbar-user-toggle {
+                padding: 6px 12px;
+                border-radius: 20px;
+            }
+            
+            .navbar-user-name {
+                font-size: 12px;
+            }
+            
+            .navbar-user-email {
+                font-size: 9px;
+            }
+            
+            .navbar-user-dropdown {
+                position: static;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+                box-shadow: none;
+                background: rgba(255, 255, 255, 0.95);
+                margin: 8px 0 0 0;
+                border-radius: 8px;
+            }
+            
+            .navbar-user-dropdown::before {
+                display: none;
+            }
         }
         
         /* ============================================
@@ -239,12 +437,59 @@
                 <li class="navbar-item">
                     <a href="#" class="navbar-link" data-page="contact">CONTACT US</a>
                 </li>
-                <li class="navbar-item">
-                    <!-- CHANGED: Use data-page="login" instead of direct href -->
-                    <a href="#" class="navbar-link navbar-btn-login" data-page="login/login">
+                
+                <!-- LOGIN/USER SECTION - UPDATED -->
+                <li class="navbar-item navbar-login-section logged-out" id="navbarLoginSection">
+                    <!-- LOGIN BUTTON (shown when not logged in) -->
+                    <a href="#" class="navbar-link navbar-btn-login" data-page="login/login" id="navbarLoginBtn">
                         <i class="fas fa-sign-in-alt"></i> LOGIN
                     </a>
+                    
+                    <!-- USER MENU (shown when logged in) -->
+                    <div class="navbar-user-menu" id="navbarUserMenu">
+                        <div class="navbar-user-toggle" id="navbarUserToggle">
+                            <div class="navbar-user-avatar" id="navbarUserAvatar">U</div>
+                            <div class="navbar-user-info">
+                                <div class="navbar-user-name" id="navbarUserName">User</div>
+                                <div class="navbar-user-email" id="navbarUserEmail">user@example.com</div>
+                            </div>
+                            <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i>
+                        </div>
+                        
+                        <div class="navbar-user-dropdown">
+                            <div class="navbar-user-dropdown-header">
+                                <div class="navbar-user-dropdown-name" id="navbarUserDropdownName">User Name</div>
+                                <div class="navbar-user-dropdown-email" id="navbarUserDropdownEmail">user@example.com</div>
+                            </div>
+                            
+                            <a href="#" class="navbar-user-dropdown-item" data-page="profile">
+                                <i class="fas fa-user"></i> My Profile
+                            </a>
+                            <a href="#" class="navbar-user-dropdown-item" data-page="bookings">
+                                <i class="fas fa-calendar-alt"></i> My Bookings
+                            </a>
+                            <a href="#" class="navbar-user-dropdown-item" data-page="reservation">
+                                <i class="fas fa-plus-circle"></i> New Booking
+                            </a>
+                            
+                            <div class="navbar-user-dropdown-divider"></div>
+                            
+                            <a href="#" class="navbar-user-dropdown-item" data-page="settings">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <a href="#" class="navbar-user-dropdown-item" data-page="help">
+                                <i class="fas fa-question-circle"></i> Help & Support
+                            </a>
+                            
+                            <div class="navbar-user-dropdown-divider"></div>
+                            
+                            <a href="#" class="navbar-user-dropdown-item navbar-user-dropdown-logout" onclick="logoutUser()" id="navbarLogoutBtn">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
                 </li>
+                
                 <li class="navbar-item">
                     <a href="#" class="navbar-link navbar-btn-book" data-page="reservation">BOOK NOW</a>
                 </li>
@@ -365,5 +610,136 @@
     <!-- Scripts -->
     <script src="js/navbar-scroll.js"></script>
     <script src="js/main.js"></script>
+    
+    <!-- USER AUTHENTICATION SCRIPT - NEW -->
+    <script>
+        console.log('🚀 Navbar user authentication loaded');
+        
+        // Global user state
+        let currentNavbarUser = null;
+        
+        // Check user status on page load
+        function checkNavbarUserStatus() {
+            console.log('🔍 Checking navbar user status...');
+            
+            fetch('checkUser')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📊 Navbar user status:', data);
+                    
+                    if (data.loggedIn) {
+                        currentNavbarUser = data.user;
+                        showNavbarLoggedInState(data.user, data.autoLogin);
+                    } else {
+                        showNavbarLoggedOutState();
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error checking navbar user status:', error);
+                    showNavbarLoggedOutState();
+                });
+        }
+        
+        // Show logged in state in navbar
+        function showNavbarLoggedInState(user, autoLogin = false) {
+            console.log('✅ Showing navbar logged in state for:', user);
+            
+            const loginSection = document.getElementById('navbarLoginSection');
+            const userAvatar = document.getElementById('navbarUserAvatar');
+            const userName = document.getElementById('navbarUserName');
+            const userEmail = document.getElementById('navbarUserEmail');
+            const dropdownName = document.getElementById('navbarUserDropdownName');
+            const dropdownEmail = document.getElementById('navbarUserDropdownEmail');
+            
+            // Switch to logged in state
+            loginSection.className = 'navbar-item navbar-login-section logged-in';
+            
+            // Update user info
+            const displayName = user.name || user.email.split('@')[0];
+            const firstLetter = displayName.charAt(0).toUpperCase();
+            
+            userAvatar.textContent = firstLetter;
+            userName.textContent = displayName;
+            userEmail.textContent = user.email;
+            dropdownName.textContent = displayName;
+            dropdownEmail.textContent = user.email;
+            
+            console.log('✅ Navbar updated for user:', displayName);
+        }
+        
+        // Show logged out state in navbar
+        function showNavbarLoggedOutState() {
+            console.log('📝 Showing navbar logged out state');
+            
+            const loginSection = document.getElementById('navbarLoginSection');
+            loginSection.className = 'navbar-item navbar-login-section logged-out';
+            
+            currentNavbarUser = null;
+        }
+        
+        // Logout function
+        function logoutUser() {
+            if (!confirm('Are you sure you want to logout?')) return;
+            
+            console.log('👋 Logging out user...');
+            
+            fetch('logout', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('✅ Logout successful');
+                    showNavbarLoggedOutState();
+                    
+                    // Show success message if function exists
+                    if (typeof showMessage === 'function') {
+                        showMessage('👋 Logged out successfully', 'info');
+                    }
+                    
+                    // Redirect to home page
+                    if (typeof loadPage === 'function') {
+                        loadPage('home');
+                    }
+                } else {
+                    console.error('❌ Logout failed:', data.message);
+                    if (typeof showMessage === 'function') {
+                        showMessage('❌ Error during logout', 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('❌ Logout error:', error);
+                if (typeof showMessage === 'function') {
+                    showMessage('⚠️ Network error during logout', 'error');
+                }
+            });
+        }
+        
+        // Global function to update navbar after login
+        window.updateNavbarAfterLogin = function(user) {
+            console.log('🔄 Updating navbar after login:', user);
+            showNavbarLoggedInState(user);
+        };
+        
+        // Global function to update navbar after logout
+        window.updateNavbarAfterLogout = function() {
+            console.log('🔄 Updating navbar after logout');
+            showNavbarLoggedOutState();
+        };
+        
+        // Check user status when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Small delay to ensure other scripts are loaded
+            setTimeout(checkNavbarUserStatus, 500);
+        });
+        
+        // Also check when page becomes visible (for browser back/forward)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                setTimeout(checkNavbarUserStatus, 200);
+            }
+        });
+    </script>
 </body>
 </html>

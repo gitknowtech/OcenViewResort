@@ -1,123 +1,133 @@
 package servlets;
 
-import dao.UserDAO;
-import models.User;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.regex.Pattern;
 
-@WebServlet("/signup")
+@WebServlet("/signup")  // <-- මේක තියෙනවද බලන්න
 public class SignupServlet extends HttpServlet {
-    private UserDAO userDAO;
-    private static final Pattern EMAIL_PATTERN = 
-            Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
-    
+    private static final long serialVersionUID = 1L;
+
     @Override
-    public void init() throws ServletException {
-        userDAO = new UserDAO();
-    }
-    
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // CORS headers add කරන්න
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
         
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        
+
         try {
-            // Get form parameters
             String email = request.getParameter("email");
             String password = request.getParameter("password");
             String confirmPassword = request.getParameter("confirmPassword");
-            String terms = request.getParameter("terms");
-            
-            // Validate input
+
+            System.out.println("=== SIGNUP REQUEST ===");
+            System.out.println("Email: " + email);
+            System.out.println("Password: " + (password != null ? "received" : "null"));
+
+            // Validation
             if (email == null || email.trim().isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"success\": false, \"message\": \"Email is required\"}");
+                out.print("{\"success\":false,\"message\":\"Email is required\"}");
                 return;
             }
             
-            if (!EMAIL_PATTERN.matcher(email.trim()).matches()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"success\": false, \"message\": \"Please enter a valid email address\"}");
+            if (password == null || password.trim().isEmpty()) {
+                out.print("{\"success\":false,\"message\":\"Password is required\"}");
                 return;
             }
             
-            if (password == null || password.length() < 8) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"success\": false, \"message\": \"Password must be at least 8 characters long\"}");
+            if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                out.print("{\"success\":false,\"message\":\"Confirm password is required\"}");
                 return;
             }
             
             if (!password.equals(confirmPassword)) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"success\": false, \"message\": \"Passwords do not match\"}");
+                out.print("{\"success\":false,\"message\":\"Passwords do not match\"}");
                 return;
             }
             
-            if (!"on".equals(terms)) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"success\": false, \"message\": \"Please accept the Terms of Service\"}");
+            if (password.length() < 8) {
+                out.print("{\"success\":false,\"message\":\"Password must be at least 8 characters\"}");
                 return;
             }
+
+            email = email.trim().toLowerCase();
+
+            // Database
+            String url = "jdbc:mysql://localhost:3306/oceanview?useSSL=false&serverTimezone=UTC";
+            String dbUser = "root";
+            String dbPassword = "";
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
             
-            // Check if email already exists
-            if (userDAO.emailExists(email.trim())) {
-                response.setStatus(HttpServletResponse.SC_CONFLICT);
-                out.print("{\"success\": false, \"message\": \"Email address is already registered\"}");
-                return;
-            }
-            
-            // Create new user
-            User newUser = new User(email.trim(), password);
-            
-            if (userDAO.createUser(newUser)) {
-                // Registration successful
-                HttpSession session = request.getSession();
-                session.setAttribute("user", newUser);
-                session.setAttribute("userId", newUser.getId());
-                session.setAttribute("userEmail", newUser.getEmail());
-                session.setMaxInactiveInterval(30 * 60); // 30 minutes
+            try (Connection conn = DriverManager.getConnection(url, dbUser, dbPassword)) {
                 
-                response.setStatus(HttpServletResponse.SC_CREATED);
-                out.print("{\"success\": true, \"message\": \"Account created successfully\", \"redirect\": \"dashboard\"}");
-                
-            } else {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                out.print("{\"success\": false, \"message\": \"Failed to create account. Please try again.\"}");
+                // Check email exists
+                try (PreparedStatement check = conn.prepareStatement("SELECT id FROM users WHERE email = ?")) {
+                    check.setString(1, email);
+                    try (ResultSet rs = check.executeQuery()) {
+                        if (rs.next()) {
+                            out.print("{\"success\":false,\"message\":\"Email already registered\"}");
+                            return;
+                        }
+                    }
+                }
+
+                // Hash password
+                String hashedPassword = sha256(password);
+
+                // Insert user
+                try (PreparedStatement insert = conn.prepareStatement(
+                        "INSERT INTO users (email, password) VALUES (?, ?)", 
+                        Statement.RETURN_GENERATED_KEYS)) {
+                    
+                    insert.setString(1, email);
+                    insert.setString(2, hashedPassword);
+                    
+                    int rows = insert.executeUpdate();
+                    
+                    if (rows > 0) {
+                        System.out.println("✅ User created: " + email);
+                        out.print("{\"success\":true,\"message\":\"Account created successfully!\"}");
+                    } else {
+                        out.print("{\"success\":false,\"message\":\"Failed to create account\"}");
+                    }
+                }
             }
             
         } catch (Exception e) {
-            System.err.println("❌ Signup error: " + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            out.print("{\"success\": false, \"message\": \"Server error occurred\"}");
-        } finally {
-            out.flush();
-            out.close();
+            System.out.println("❌ Error: " + e.getMessage());
+            e.printStackTrace();
+            out.print("{\"success\":false,\"message\":\"Server error\"}");
         }
     }
-    
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
+
+    private String sha256(String input) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
         
-        // Check if user is already logged in
-        HttpSession session = request.getSession(false);
-        if (session != null && session.getAttribute("user") != null) {
-            response.sendRedirect("dashboard");
-            return;
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hash) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) sb.append('0');
+            sb.append(hex);
         }
-        
-        // Forward to signup page
-        request.getRequestDispatcher("index.jsp").forward(request, response);
+        return sb.toString();
     }
 }
