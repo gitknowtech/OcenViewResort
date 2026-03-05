@@ -32,10 +32,6 @@
     .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
     .badge-active { background: #d1fae5; color: #065f46; }
     .badge-inactive { background: #fee2e2; color: #991b1b; }
-    .badge-maintenance { background: #fef3c7; color: #92400e; }
-    .badge-non-maintenance { background: #dbeafe; color: #1e40af; }
-    .badge-booked { background: #fecaca; color: #7f1d1d; }
-    .badge-non-booked { background: #c7d2fe; color: #3730a3; }
     @media (max-width: 1400px) { .container { grid-template-columns: 1fr; } }
 </style>
 
@@ -43,44 +39,36 @@
 
 <div class="container">
     <div class="card">
-        <div class="card-title">🚪 Rooms Management</div>
+        <div class="card-title">👥 Users Management (Website Customers)</div>
         <input type="text" id="search" placeholder="🔍 Search...">
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Room #</th>
-                    <th>Type</th>
-                    <th>Capacity</th>
-                    <th>Price</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>City</th>
                     <th>Status</th>
-                    <th>Maintenance</th>
-                    <th>Booking</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="roomsTable">
-                <tr><td colspan="9" style="text-align: center; padding: 40px;">Loading...</td></tr>
+            <tbody id="usersTable">
+                <tr><td colspan="7" style="text-align: center; padding: 40px;">Loading...</td></tr>
             </tbody>
         </table>
     </div>
     
     <div class="card">
-        <div class="card-title" id="formTitle">➕ Add Room</div>
-        <input type="hidden" id="roomId">
+        <div class="card-title" id="formTitle">➕ Add User</div>
+        <input type="hidden" id="userId">
         <input type="hidden" id="mode" value="add">
-        <input type="text" id="room_number" placeholder="Room Number" required>
-        
-        <select id="room_type" required>
-            <option value="">Select Room Type</option>
-            <option value="Day">Day</option>
-            <option value="Night">Night</option>
-            <option value="Day-Night">Day-Night</option>
-        </select>
-        
-        <input type="number" id="capacity" placeholder="Capacity (Guests)" min="1" required>
-        
-        <input type="number" id="room_price" placeholder="Room Price" min="0" step="0.01" required>
+        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="tel" id="phone" placeholder="Phone Number" required>
+        <input type="text" id="address" placeholder="Address">
+        <input type="text" id="city" placeholder="City">
+        <input type="text" id="country" placeholder="Country">
         
         <select id="status" required>
             <option value="">Select Status</option>
@@ -88,22 +76,8 @@
             <option value="inactive">Inactive</option>
         </select>
         
-        <select id="maintenance" required>
-            <option value="">Select Maintenance</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="non-maintenance">Non-Maintenance</option>
-        </select>
-        
-        <select id="booking_status" required>
-            <option value="">Select Booking Status</option>
-            <option value="booked">Booked</option>
-            <option value="non-booked">Non-Booked</option>
-        </select>
-        
-        <textarea id="description" placeholder="Description" rows="3"></textarea>
-        
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button class="btn btn-primary" id="submitBtn"><i class="fas fa-save"></i> Add Room</button>
+            <button class="btn btn-primary" id="submitBtn"><i class="fas fa-save"></i> Add User</button>
             <button class="btn btn-secondary" id="resetBtn"><i class="fas fa-redo"></i> Clear</button>
         </div>
     </div>
