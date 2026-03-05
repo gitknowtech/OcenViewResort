@@ -514,24 +514,28 @@
 }
 </style>
 
+
+
+
+
+
+
+
+
 <script>
 function showPackages(packageType) {
     console.log("Showing packages for:", packageType);
     
-    // Remove active class from all buttons
     document.querySelectorAll('.package-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     
-    // Add active class to clicked button
     event.target.classList.add('active');
     
-    // Hide all package grids
     document.querySelectorAll('.accommodation-grid').forEach(grid => {
         grid.style.display = 'none';
     });
     
-    // Show selected package grid with fade effect
     const selectedGrid = document.getElementById(packageType + '-packages');
     if (selectedGrid) {
         selectedGrid.style.display = 'grid';
@@ -543,16 +547,82 @@ function showPackages(packageType) {
     }
 }
 
-// Initialize when page loads
+// ✅ BOOK BUTTON HANDLER
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Accommodation page loaded");
-    // Show night packages by default
     showPackages('night');
+    
+    // Add click listeners to all book buttons
+    document.querySelectorAll('.book-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const roomType = this.getAttribute('data-room');
+            const price = this.getAttribute('data-price');
+            const packageType = this.getAttribute('data-page');
+            
+            console.log('📦 Booking clicked:');
+            console.log('   Room:', roomType);
+            console.log('   Price:', price);
+            console.log('   Package:', packageType);
+            
+            // Get room card details
+            const roomCard = this.closest('.room-card');
+            const roomName = roomCard.querySelector('.room-info h3').textContent;
+            const roomDescription = roomCard.querySelector('.room-info p').textContent;
+            
+            // Determine package type and duration
+            let packageCategory = 'night';
+            let duration = 1;
+            let checkInTime = '14:00';
+            let checkOutTime = '12:00';
+            
+            if (roomType.includes('-night')) {
+                packageCategory = 'night';
+                duration = 1;
+                checkInTime = '14:00';
+                checkOutTime = '12:00';
+            } else if (roomType.includes('-day')) {
+                packageCategory = 'day';
+                duration = 0.5; // Half day
+                checkInTime = '09:00';
+                checkOutTime = '18:00';
+            } else if (roomType.includes('-combo')) {
+                packageCategory = 'combo';
+                duration = 1;
+                checkInTime = '09:00';
+                checkOutTime = '18:00'; // Next day
+            }
+            
+            // Store booking data in sessionStorage
+            const bookingData = {
+                roomType: roomType,
+                roomName: roomName,
+                roomDescription: roomDescription,
+                price: price,
+                packageCategory: packageCategory,
+                duration: duration,
+                checkInTime: checkInTime,
+                checkOutTime: checkOutTime,
+                timestamp: new Date().getTime()
+            };
+            
+            console.log('💾 Storing booking data:', bookingData);
+            sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+            
+            // Navigate to reservation page
+            if (typeof loadPage === 'function') {
+                loadPage('reservation');
+            } else {
+                window.location.href = 'reservation.jsp';
+            }
+        });
+    });
 });
 
-// Also initialize when loaded via AJAX
 $(document).ready(function() {
     console.log("jQuery ready - accommodation page");
     showPackages('night');
 });
 </script>
+ 
