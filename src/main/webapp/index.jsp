@@ -557,97 +557,84 @@
         <!-- Content loaded dynamically -->
     </main>
 
-    <!-- Footer -->
-    <footer class="footer footer-main">
-        <div class="footer-wrapper">
-            <div class="container">
-                <div class="footer-content">
-                    <!-- Section 1: About -->
-                    <div class="footer-section footer-section-about">
-                        <h3 class="footer-section-title">Ocean View Beach Resort</h3>
-                        <p class="footer-section-desc">Experience luxury and adventure in beautiful Kalpitiya, Sri Lanka</p>
-                        <div class="footer-contact">
-                            <p class="footer-contact-item">
-                                <i class="fas fa-phone"></i> +94 77 123 4567
-                            </p>
-                            <p class="footer-contact-item">
-                                <i class="fas fa-envelope"></i> info@oceanviewresort.lk
-                            </p>
-                            <p class="footer-contact-item">
-                                <i class="fas fa-map-marker-alt"></i> Kalpitiya, Sri Lanka
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Section 2: Quick Links -->
-                    <div class="footer-section footer-section-links">
-                        <h4 class="footer-section-subtitle">Quick Links</h4>
-                        <ul class="footer-links-list">
-                            <li><a href="#" data-page="home">Home</a></li>
-                            <li><a href="#" data-page="accommodation">Accommodation</a></li>
-                            <li><a href="#" data-page="events">Events</a></li>
-                            <li><a href="#" data-page="cuisine">Cuisine</a></li>
-                            <li><a href="#" data-page="contact">Contact</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Section 3: Events -->
-                    <div class="footer-section footer-section-events">
-                        <h4 class="footer-section-subtitle">Popular Events</h4>
-                        <ul class="footer-links-list">
-                            <li><a href="#" data-page="events/wilpattu-safari">Wilpattu Safari</a></li>
-                            <li><a href="#" data-page="events/kitesurfing">Kitesurfing</a></li>
-                            <li><a href="#" data-page="events/whale-watching">Whale Watching</a></li>
-                            <li><a href="#" data-page="events/dolphin-watching">Dolphin Watching</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Section 4: Social & Newsletter -->
-                    <div class="footer-section footer-section-social">
-                        <h4 class="footer-section-subtitle">Follow Us</h4>
-                        <div class="footer-social-links">
-                            <a href="#" class="footer-social-link" title="Facebook">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="#" class="footer-social-link" title="Instagram">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                            <a href="#" class="footer-social-link" title="Twitter">
-                                <i class="fab fa-twitter"></i>
-                            </a>
-                            <a href="#" class="footer-social-link" title="YouTube">
-                                <i class="fab fa-youtube"></i>
-                            </a>
-                        </div>
-                        
-                        <div class="footer-newsletter">
-                            <h5 class="footer-newsletter-title">Newsletter</h5>
-                            <p class="footer-newsletter-desc">Subscribe for updates</p>
-                            <form class="footer-newsletter-form">
-                                <input type="email" class="footer-newsletter-input" placeholder="Your email" required>
-                                <button type="submit" class="footer-newsletter-btn">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                            </form>
+  <footer class="footer footer-main">
+    <div class="footer-wrapper">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section footer-section-about">
+                    <h3 class="footer-section-title">Ocean View Beach Resort</h3>
+                    <p class="footer-section-desc">Experience luxury and heritage in beautiful Galle, Sri Lanka</p>
+                    <div class="footer-contact">
+                        <p class="footer-contact-item">
+                            <i class="fas fa-phone"></i> +94 91 123 4567
+                        </p>
+                        <p class="footer-contact-item">
+                            <i class="fas fa-envelope"></i> info@oceanviewresort.lk
+                        </p>
+                        <p class="footer-contact-item">
+                            <i class="fas fa-map-marker-alt"></i> Galle, Sri Lanka
+                        </p>
                     </div>
                 </div>
-            </div>
 
-            <!-- Footer Bottom -->
-            <div class="footer-bottom">
-                <div class="container">
-                    <div class="footer-bottom-content">
-                        <p class="footer-bottom-text">&copy; 2026 Ocean View Beach Resort. All rights reserved.</p>
-                        <div class="footer-bottom-links">
-                            <a href="#">Privacy Policy</a>
-                            <a href="#">Terms of Service</a>
-                            <a href="#">Sitemap</a>
-                        </div>
+                <div class="footer-section footer-section-links">
+                    <h4 class="footer-section-subtitle">Quick Links</h4>
+                    <ul class="footer-links-list">
+                        <li><a href="#" data-page="home">Home</a></li>
+                        <li><a href="#" data-page="accommodation">Accommodation</a></li>
+                        <li><a href="#" data-page="events">Events</a></li>
+                        <li><a href="#" data-page="cuisine">Cuisine</a></li>
+                        <li><a href="#" data-page="contact">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section footer-section-events">
+                    <h4 class="footer-section-subtitle">Popular Events</h4>
+                    <ul class="footer-links-list">
+                        <li><a href="#" data-page="events/galle-fort-tour">Galle Fort Tour</a></li>
+                        <li><a href="#" data-page="events/whale-watching">Whale Watching</a></li>
+                        <li><a href="#" data-page="events/turtle-hatchery">Turtle Hatchery Visit</a></li>
+                        <li><a href="#" data-page="events/surfing">Surfing Lessons</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section footer-section-social">
+                    <h4 class="footer-section-subtitle">Follow Us</h4>
+                    <div class="footer-social-links">
+                        <a href="#" class="footer-social-link" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="footer-social-link" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="footer-social-link" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="footer-social-link" title="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    
+                    <div class="footer-newsletter">
+                        <h5 class="footer-newsletter-title">Newsletter</h5>
+                        <p class="footer-newsletter-desc">Subscribe for updates</p>
+                        <form class="footer-newsletter-form">
+                            <input type="email" class="footer-newsletter-input" placeholder="Your email" required>
+                            <button type="submit" class="footer-newsletter-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-    </footer>
+
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="footer-bottom-content">
+                    <p class="footer-bottom-text">&copy; 2026 Ocean View Beach Resort. All rights reserved.</p>
+                    <div class="footer-bottom-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Sitemap</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
 
     <!-- Scripts -->
     <script src="js/navbar-scroll.js"></script>

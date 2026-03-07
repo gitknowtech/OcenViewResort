@@ -78,12 +78,14 @@ function proceedWithBooking() {
 // ========== SHOW USER NOT LOGGED IN ==========
 function showUserNotLoggedIn() {
     console.error('❌ NO USER FOUND - User must be logged in');
-    alert('❌ Please login first to make a booking');
-    if (typeof loadPage === 'function') {
-        loadPage('login/login');
-    } else {
-        window.location.href = 'index.jsp';
-    }
+    showMessage('❌ Please login first to make a booking', 'error');
+    setTimeout(() => {
+        if (typeof loadPage === 'function') {
+            loadPage('login/login');
+        } else {
+            window.location.href = 'index.jsp';
+        }
+    }, 1500);
 }
 
 // ========== SET DEFAULT DATES ==========
@@ -233,6 +235,9 @@ function selectRoom(panel) {
     
     // Update summary
     updateSummary();
+    
+    // Show success message
+    showMessage('✅ Room #' + panel.dataset.roomNumber + ' selected!', 'success');
 }
 
 // ========== UPDATE ROOM DETAILS ==========
@@ -318,10 +323,12 @@ function submitBooking(e) {
     // ✅ VALIDATE USER
     if (!bookingState.currentUser || !bookingState.currentUser.id) {
         console.error('❌ USER VALIDATION FAILED');
-        alert('❌ User not found. Please login again.');
-        if (typeof loadPage === 'function') {
-            loadPage('login/login');
-        }
+        showMessage('❌ User not found. Please login again.', 'error');
+        setTimeout(() => {
+            if (typeof loadPage === 'function') {
+                loadPage('login/login');
+            }
+        }, 1500);
         return;
     }
     
@@ -333,7 +340,7 @@ function submitBooking(e) {
     // Get selected room
     const selectedPanel = document.querySelector('.room-panel.selected');
     if (!selectedPanel) {
-        alert('❌ Please select a room');
+        showMessage('❌ Please select a room', 'error');
         return;
     }
     
@@ -347,14 +354,14 @@ function submitBooking(e) {
     
     // Validate
     if (!checkInDate || !checkOutDate || !numberOfGuests) {
-        alert('❌ Please fill all required fields');
+        showMessage('❌ Please fill all required fields', 'error');
         return;
     }
     
     // Validate guest count
     const guestCount = parseInt(numberOfGuests);
     if (guestCount < 1 || guestCount > 10) {
-        alert('❌ Guest count must be between 1 and 10');
+        showMessage('❌ Guest count must be between 1 and 10', 'error');
         return;
     }
     
@@ -436,9 +443,16 @@ function submitBooking(e) {
             
             if (data.success) {
                 console.log('🎉 BOOKING SUCCESSFUL!');
-                alert('✅ Booking Confirmed!\n\nBooking ID: ' + data.bookingId + 
-                      '\nTotal: LKR ' + data.totalPrice.toLocaleString() + 
-                      '\nNights: ' + data.nights);
+                
+                // ✅ SHOW SUCCESS MESSAGE WITH EMAIL CONFIRMATION
+                showBookingSuccessModal(
+                    data.bookingId,
+                    data.totalPrice,
+                    data.nights,
+                    bookingState.currentUser.email,
+                    selectedPanel.dataset.roomNumber,
+                    selectedPanel.dataset.roomType
+                );
                 
                 // Reset
                 document.getElementById('bookingForm').reset();
@@ -448,32 +462,121 @@ function submitBooking(e) {
                 // Reload
                 loadAllRooms();
                 
-                // Redirect
+                // Redirect after delay
                 setTimeout(() => {
                     if (typeof loadPage === 'function') {
-                        loadPage('home');
+                        loadPage('booking-view');
                     }
-                }, 2000);
+                }, 4000);
             } else {
                 console.error('❌ Booking failed:', data.message);
-                alert('❌ Booking Failed: ' + (data.message || 'Unknown error'));
+                showMessage('❌ Booking Failed: ' + (data.message || 'Unknown error'), 'error');
                 bookBtn.disabled = false;
                 bookBtn.textContent = '✓ CONFIRM BOOKING';
             }
         } catch (parseError) {
             console.error('❌ JSON Parse Error:', parseError);
             console.error('Response was:', text);
-            alert('⚠️ Server error: Invalid response format');
+            showMessage('⚠️ Server error: Invalid response format', 'error');
             bookBtn.disabled = false;
             bookBtn.textContent = '✓ CONFIRM BOOKING';
         }
     })
     .catch(error => {
         console.error('❌ Network Error:', error);
-        alert('⚠️ Network error: ' + error.message);
+        showMessage('⚠️ Network error: ' + error.message, 'error');
         bookBtn.disabled = false;
         bookBtn.textContent = '✓ CONFIRM BOOKING';
     });
+}
+
+// ========== SHOW BOOKING SUCCESS MODAL ==========
+function showBookingSuccessModal(bookingId, totalPrice, nights, email, roomNumber, roomType) {
+    console.log('🎉 Showing success modal...');
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div id="bookingSuccessModal" class="booking-modal-overlay">
+            <div class="booking-modal-content">
+                <!-- Header -->
+                <div class="booking-modal-header">
+                    <div class="booking-modal-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>🎉 Booking Confirmed!</h2>
+                </div>
+                
+                <!-- Body -->
+                <div class="booking-modal-body">
+                    <div class="booking-info-section">
+                        <h3>Booking Details</h3>
+                        <div class="booking-info-row">
+                            <span class="booking-info-label">Booking ID:</span>
+                            <span class="booking-info-value">#${bookingId}</span>
+                        </div>
+                        <div class="booking-info-row">
+                            <span class="booking-info-label">Room:</span>
+                            <span class="booking-info-value">#${roomNumber} - ${roomType}</span>
+                        </div>
+                        <div class="booking-info-row">
+                            <span class="booking-info-label">Number of Nights:</span>
+                            <span class="booking-info-value">${nights}</span>
+                        </div>
+                        <div class="booking-info-row total">
+                            <span class="booking-info-label">Total Amount:</span>
+                            <span class="booking-info-value">LKR ${totalPrice.toLocaleString()}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="booking-email-section">
+                        <div class="booking-email-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <p class="booking-email-text">
+                            A confirmation email with your bill has been sent to:<br>
+                            <strong>${email}</strong>
+                        </p>
+                    </div>
+                    
+                    <div class="booking-message-section">
+                        <p>✅ Your booking is confirmed and saved in our system.</p>
+                        <p>📧 Check your email for the complete booking details and bill.</p>
+                        <p>📞 If you have any questions, contact us at +94 77 123 4567</p>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="booking-modal-footer">
+                    <button class="booking-modal-btn primary" onclick="closeBookingModal(); loadPage('booking-view');">
+                        <i class="fas fa-calendar-alt"></i> View My Bookings
+                    </button>
+                    <button class="booking-modal-btn secondary" onclick="closeBookingModal(); loadPage('home');">
+                        <i class="fas fa-home"></i> Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Show modal with animation
+    const modal = document.getElementById('bookingSuccessModal');
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 100);
+}
+
+// ========== CLOSE BOOKING MODAL ==========
+function closeBookingModal() {
+    const modal = document.getElementById('bookingSuccessModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
 }
 
 // ========== ERROR MESSAGES ==========
@@ -489,6 +592,40 @@ function showNoRoomsMessage() {
     if (container) {
         container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #999;">No rooms available</div>`;
     }
+}
+
+// ========== SHOW MESSAGE FUNCTION ==========
+function showMessage(text, type = 'info') {
+    console.log(`📢 ${type.toUpperCase()}: ${text}`);
+    
+    const bgColor = type === 'success' ? '#10b981' : 
+                   type === 'error' ? '#ef4444' : 
+                   type === 'warning' ? '#f59e0b' : '#3b82f6';
+    
+    const msg = document.createElement('div');
+    msg.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        z-index: 9998;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        background: ${bgColor};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        min-width: 250px;
+        animation: slideIn 0.3s ease-out;
+    `;
+    msg.innerHTML = text;
+    document.body.appendChild(msg);
+    
+    setTimeout(() => {
+        msg.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => {
+            msg.remove();
+        }, 300);
+    }, 4000);
 }
 
 // ========== AUTO INITIALIZE ==========

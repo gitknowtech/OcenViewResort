@@ -18,6 +18,9 @@
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="C:/Users/ar115/Downloads/gson-2.10.1-javadoc.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/ar115/Downloads/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/ar115/Downloads/activation-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/ar115/Downloads/javax.mail-1.6.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/ar115/Downloads/javax.mail-api-1.6.2.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
